@@ -40,12 +40,11 @@ function TabsPage() {
   const [fetching, setFetching] = useState(false);
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(1.0);
-  const containerRef = useRef(null);
+  const transformRef = useRef(null);
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isSliderDragging, setIsSliderDragging] = useState(false);
-  const [twReady, setTwReady] = useState(false);
   const [autoFetching, setAutoFetching] = useState(false);
   const [autoFetchError, setAutoFetchError] = useState(null);
 
@@ -123,12 +122,6 @@ function TabsPage() {
       });
   }, [name]);
 
-  // 延迟挂载 TransformWrapper，确保浏览器原生滚动先就绪
-  useEffect(() => {
-    if (twReady || selectedImages.length === 0) return;
-    const timer = setTimeout(() => setTwReady(true), 800);
-    return () => clearTimeout(timer);
-  }, [selectedImages, twReady]);
 
   const handleFetchFromUrl = async () => {
     if (!customUrl.trim()) {
@@ -288,7 +281,7 @@ function TabsPage() {
     e.target.value = '';
   };
 
-  // 自动滚动：映射 scrollSpeed (0-10) 到 0-200px/s，使用 dt 保证帧率无关
+  // 自动滚动：通过 transformRef 控制位置
   useEffect(() => {
     if (!isAutoScrolling || scrollSpeed <= 0) {
       if (scrollRef.current) {
@@ -297,9 +290,6 @@ function TabsPage() {
       }
       return;
     }
-
-    const container = containerRef.current;
-    if (!container) return;
 
     const speedPxPerSec = scrollSpeed * 8;
     let lastTime = performance.now();
@@ -319,13 +309,24 @@ function TabsPage() {
         return;
       }
 
-      const maxScrollTop = container.scrollHeight - container.clientHeight;
-      if (container.scrollTop >= maxScrollTop) {
+      const ctx = transformRef.current;
+      if (!ctx) {
         scrollRef.current = null;
         return;
       }
 
-      container.scrollTop = Math.min(container.scrollTop + scrollDelta, maxScrollTop);
+      const { scale, positionX, positionY } = ctx.state;
+      const newY = positionY - scrollDelta / scale;
+
+      ctx.setTransform(positionX, newY, scale, 0);
+
+      // 位置未变化说明已到达边界，停止滚动
+      if (ctx.state.positionY === positionY) {
+        setIsAutoScrolling(false);
+        scrollRef.current = null;
+        return;
+      }
+
       scrollRef.current = requestAnimationFrame(animate);
     };
 
@@ -370,7 +371,7 @@ function TabsPage() {
               <Title level={3} className="detail-title">{name}</Title>
             </div>
             {selectedImages.length > 0 && !showSelector && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0, flex: 1, justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0, flex: 1, maxWidth: '400px', justifyContent: 'space-between' }}>
                 <Space size={4} className="detail-scroll-toggle">
                   <Switch
                     size="small"
@@ -409,39 +410,17 @@ function TabsPage() {
       >
         {selectedImages.length > 0 && !showSelector && (
           <div className="detail-body">
-            <div
-              ref={containerRef}
-              className="scrollable-container"
-              style={{
-                flex: 1,
-                minHeight: 0,
-                overflowY: 'auto',
-                overflowX: 'hidden',
-              }}
+            <TransformWrapper
+              ref={transformRef}
+              minScale={0.3}
+              maxScale={3}
+              wheel={{ disabled: false, step: 0.001 }}
+              pinch={{ disabled: false }}
+              panning={{ disabled: false, velocityDisabled: true }}
+              doubleClick={{ mode: "reset" }}
+              limitToBounds={true}
             >
-              {twReady ? (
-                <TransformWrapper
-                  minScale={0.2}
-                  maxScale={2}
-                  wheel={{ disabled: true }}
-                  pinch={{ disabled: false }}
-                  panning={{ disabled: true }}
-                  doubleClick={{ disabled: true }}
-                >
-                  <TransformComponent wrapperStyle={{ width: '100%' }}>
-                    <div className="tabs-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
-                      {selectedImages.map((url, i) => (
-                        <img
-                          key={i}
-                          src={proxyUrl(url)}
-                          alt={`谱 ${i + 1}`}
-                          className="detail-image"
-                        />
-                      ))}
-                    </div>
-                  </TransformComponent>
-                </TransformWrapper>
-              ) : (
+              <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
                 <div className="tabs-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
                   {selectedImages.map((url, i) => (
                     <img
@@ -452,8 +431,8 @@ function TabsPage() {
                     />
                   ))}
                 </div>
-              )}
-            </div>
+              </TransformComponent>
+            </TransformWrapper>
           </div>
         )}
 
