@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.claude/
+
+# 服务器上传的图片
+server/images/
+
+# OS 文件
+.DS_Store
+Thumbs.db
+
+# 环境变量
+.env
+.env.local
