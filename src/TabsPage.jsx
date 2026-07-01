@@ -46,6 +46,8 @@ function TabsPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isSliderDragging, setIsSliderDragging] = useState(false);
   const [twReady, setTwReady] = useState(false);
+  const [autoFetching, setAutoFetching] = useState(false);
+  const [autoFetchError, setAutoFetchError] = useState(null);
 
   function getColumnsByViewport(w, h) {
     const ratio = w / h;
@@ -54,7 +56,7 @@ function TabsPage() {
     if (w < 600) return 1;
 
     // 带鱼屏 / 超宽屏 (≥ 21:9)：充分利用宽度
-    if (ratio >= 2.0) {
+    if (ratio >= 2.3) {
       if (w >= 2560) return 6;
       if (w >= 1920) return 5;
       if (w >= 1280) return 4;
@@ -103,12 +105,17 @@ function TabsPage() {
         if (found) {
           setSong(found);
           if (found.imgUrl && found.imgUrl.length > 0) {
+            setLoading(false);
             setSelectedImages(found.imgUrl);
+          } else {
+            // 没有谱子 -> 全屏 loading 保持，等自动获取完成后一起释放
+            setAutoFetching(true);
+            handleAutoFetch();
           }
         } else {
           setError('歌曲未找到');
+          setLoading(false);
         }
-        setLoading(false);
       })
       .catch(err => {
         setError('加载失败');
@@ -149,6 +156,30 @@ function TabsPage() {
     } catch (err) {
       message.error('请求失败');
       setFetching(false);
+    }
+  };
+
+  const handleAutoFetch = async () => {
+    setAutoFetching(true);
+    setAutoFetchError(null);
+    try {
+      const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name)}/auto-fetch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (res.ok && data.candidate_images && data.candidate_images.length > 0) {
+        setCandidateImages(data.candidate_images);
+        setSelectedImages([]);
+        setShowSelector(true);
+      } else {
+        setAutoFetchError(data.error || '未找到相关图片');
+      }
+    } catch (err) {
+      setAutoFetchError('自动获取请求失败');
+    } finally {
+      setAutoFetching(false);
+      setLoading(false);
     }
   };
 
@@ -311,9 +342,9 @@ function TabsPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: '50px', textAlign: 'center' }}>
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
-        <p>加载中...</p>
+        <p style={{ marginTop: 12 }}>加载中...</p>
       </div>
     );
   }
@@ -428,38 +459,88 @@ function TabsPage() {
 
         {selectedImages.length === 0 && !showSelector && (
           <div className="detail-body" style={{ padding: 20 }}>
-            <Text>暂无吉他谱。</Text>
-            <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <Button
-                type="primary"
-                target="_blank"
-                href={`https://cn.bing.com/search?q=${encodeURIComponent(name)}吉他谱`}
-                icon={<SearchOutlined />}
-              >
-                去 Bing 搜索
-              </Button>
-              <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
-                本地上传
-              </Button>
-              <Input
-                placeholder="或直接输入吉他谱页面URL"
-                value={customUrl}
-                onChange={(e) => setCustomUrl(e.target.value)}
-                style={{ width: '360px' }}
-              />
-              <Button
-                onClick={handleFetchFromUrl}
-                loading={fetching}
-                disabled={!customUrl.trim()}
-              >
-                提取图片
-              </Button>
-            </div>
+            {autoFetching ? (
+              <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+                <p style={{ marginTop: 12, color: '#666' }}>正在自动搜索 &ldquo;{name}吉他谱&rdquo;...</p>
+              </div>
+            ) : autoFetchError ? (
+              <div>
+                <Text>暂无吉他谱。</Text>
+                <Alert
+                  message="自动获取失败"
+                  description={autoFetchError}
+                  type="warning"
+                  showIcon
+                  style={{ marginTop: 12, marginBottom: 12 }}
+                />
+                <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <Button type="primary" onClick={handleAutoFetch} icon={<SearchOutlined />}>
+                    重试
+                  </Button>
+                  <Button
+                    target="_blank"
+                    href={`https://cn.bing.com/search?q=${encodeURIComponent(name)}吉他谱`}
+                    icon={<SearchOutlined />}
+                  >
+                    去 Bing 搜索
+                  </Button>
+                  <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
+                    本地上传
+                  </Button>
+                  <Input
+                    placeholder="或直接输入吉他谱页面URL"
+                    value={customUrl}
+                    onChange={(e) => setCustomUrl(e.target.value)}
+                    style={{ width: '360px' }}
+                  />
+                  <Button
+                    onClick={handleFetchFromUrl}
+                    loading={fetching}
+                    disabled={!customUrl.trim()}
+                  >
+                    提取图片
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <Text>暂无吉他谱。</Text>
+                <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <Button type="primary" onClick={handleAutoFetch} icon={<SearchOutlined />}>
+                    自动获取
+                  </Button>
+                  <Button
+                    target="_blank"
+                    href={`https://cn.bing.com/search?q=${encodeURIComponent(name)}吉他谱`}
+                    icon={<SearchOutlined />}
+                  >
+                    去 Bing 搜索
+                  </Button>
+                  <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
+                    本地上传
+                  </Button>
+                  <Input
+                    placeholder="或直接输入吉他谱页面URL"
+                    value={customUrl}
+                    onChange={(e) => setCustomUrl(e.target.value)}
+                    style={{ width: '360px' }}
+                  />
+                  <Button
+                    onClick={handleFetchFromUrl}
+                    loading={fetching}
+                    disabled={!customUrl.trim()}
+                  >
+                    提取图片
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         {showSelector && (
-          <div className="detail-body">
+          <div className="detail-body" style={{ padding: 20 }}>
             <Title level={4} style={{ margin: '10px 0' }}>请选择有效的吉他谱图片</Title>
             <Space wrap size={[8, 16]} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
               {candidateImages.map((url, i) => (

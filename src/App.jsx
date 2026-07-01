@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, Spin, Alert, Typography, Input, Modal, message, ConfigProvider, Switch } from 'antd';
+import { Button, Card, Spin, Alert, Typography, Input, Modal, message, ConfigProvider, Select } from 'antd';
 import {
   DndContext,
   closestCenter,
@@ -35,7 +35,8 @@ function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newSongName, setNewSongName] = useState('');
   const [activeId, setActiveId] = useState(null);
-  const [showLocalOnly, setShowLocalOnly] = useState(false);
+  const [sortMode, setSortMode] = useState(() => localStorage.getItem('sortMode') || 'latest');
+  const [hasFetched, setHasFetched] = useState(false);
 
   // 加载歌单
   useEffect(() => {
@@ -49,28 +50,71 @@ function App() {
           ? data.map((item, idx) => ({
             id: item.id || `song-${idx}`,
             name: item.name || item,
-            imgUrl: Array.isArray(item.imgUrl) ? item.imgUrl : []
+            imgUrl: Array.isArray(item.imgUrl) ? item.imgUrl : [],
+            createdAt: item.createdAt || null,
           }))
           : [];
         setSongs(songData);
-        setFilteredSongs(songData);
-        setLoading(false);
+        setHasFetched(true);
       })
       .catch(err => {
         console.error('加载歌单失败:', err);
         setError('加载失败，请检查后端服务是否运行');
+        setHasFetched(true);
         setLoading(false);
       });
   }, []);
 
-  // 搜索过滤
+  // 搜索 + 排序/筛选（首次等 fetch 完成再执行，避免 loading 提前结束）
   useEffect(() => {
-    const filtered = songs.filter(song => {
-      if (showLocalOnly && (!song.imgUrl || song.imgUrl.length === 0)) return false;
-      return song.name.toLowerCase().includes(searchTerm.toLowerCase());
-    });
-    setFilteredSongs(filtered);
-  }, [searchTerm, songs, showLocalOnly]);
+    if (!hasFetched) return;
+
+    let result = [...songs];
+
+    // 搜索过滤
+    if (searchTerm) {
+      result = result.filter(song =>
+        song.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // 筛选模式
+    if (sortMode === 'parsed') {
+      result = result.filter(song => song.imgUrl && song.imgUrl.length > 0);
+    } else if (sortMode === 'unparsed') {
+      result = result.filter(song => !song.imgUrl || song.imgUrl.length === 0);
+    }
+
+    // 排序（未解析的 createdAt 为 null，排到最后）
+    const sortByDate = (a, b, asc) => {
+      if (!a.createdAt && !b.createdAt) return 0;
+      if (!a.createdAt) return 1;
+      if (!b.createdAt) return -1;
+      return asc
+        ? new Date(a.createdAt) - new Date(b.createdAt)
+        : new Date(b.createdAt) - new Date(a.createdAt);
+    };
+
+    // 排序
+    if (sortMode === 'oldest') {
+      result.sort((a, b) => sortByDate(a, b, true));
+    } else if (sortMode === 'nameAsc') {
+      result.sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name));
+    } else if (sortMode === 'nameDesc') {
+      result.sort((a, b) => b.name.length - a.name.length || a.name.localeCompare(b.name));
+    } else if (sortMode !== 'custom') {
+      result.sort((a, b) => sortByDate(a, b, false));
+    }
+    // 'custom' 模式保持数组原序（即拖拽排序后的顺序）
+
+    setFilteredSongs(result);
+    setLoading(false);
+  }, [searchTerm, songs, sortMode, hasFetched]);
+
+  // 记住用户选择的排序模式
+  useEffect(() => {
+    localStorage.setItem('sortMode', sortMode);
+  }, [sortMode]);
 
   // dnd-kit 传感器配置（移动端优化）
   const sensors = useSensors(
@@ -166,7 +210,8 @@ function App() {
       const newSong = {
         id: `song-${Date.now()}`,
         name: newSongName.trim(),
-        imgUrl: []
+        imgUrl: [],
+        createdAt: new Date().toISOString(),
       };
       const updatedSongs = [...songs, newSong];
       setSongs(updatedSongs);
@@ -214,9 +259,9 @@ function App() {
 
   if (loading) {
     return (
-      <div style={{ padding: '50px', textAlign: 'center' }}>
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
-        <p>加载中...</p>
+        <p style={{ marginTop: 12 }}>加载中...</p>
       </div>
     );
   }
@@ -239,6 +284,7 @@ function App() {
     >
       <div className="app-container">
         <Card
+          style={{ flex: 1 }}
           title={
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <svg width="28" height="28" viewBox="0 0 100 100" style={{ flexShrink: 0 }}>
@@ -270,7 +316,6 @@ function App() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="control-search"
                 prefix={<SearchOutlined />}
-                style={{ width: 260 }}
               />
 
               <Button
@@ -282,22 +327,25 @@ function App() {
               <Button
                 type={isEditing ? "primary" : "default"}
                 icon={isEditing ? <SaveOutlined /> : <EditOutlined />}
-                onClick={() => isEditing ? saveOrder() : setIsEditing(true)}
+                onClick={() => isEditing ? saveOrder() : (setSortMode('custom'), setIsEditing(true))}
               >
-                {isEditing ? "保存" : "编辑"}
+                {isEditing ? "完成" : "编辑"}
               </Button>
-              <span className="control-switch">
-                <Switch
-                  checked={showLocalOnly}
-                  onChange={(checked) => setShowLocalOnly(checked)}
-                  size="small"
-                />
-                <span>已解析</span>
-              </span>
-              <span className="control-hint">
-                <span className="hint-dot"></span>
-                已解析谱子
-              </span>
+              <Select
+                value={sortMode}
+                onChange={(value) => setSortMode(value)}
+                className="control-sort"
+                disabled={isEditing}
+                options={[
+                  { value: 'custom', label: '自定义排序' },
+                  { value: 'latest', label: '最新添加' },
+                  { value: 'oldest', label: '最早添加' },
+                  { value: 'nameAsc', label: '字数从少到多' },
+                  { value: 'nameDesc', label: '字数从多到少' },
+                  { value: 'parsed', label: '已解析谱子' },
+                  { value: 'unparsed', label: '未解析谱子' },
+                ]}
+              />
             </div>
 
             <DndContext
@@ -312,15 +360,18 @@ function App() {
                     <div className="empty-state">
                       <div style={{ fontSize: 48, marginBottom: 12 }}>🎸</div>
                       <p style={{ color: '#999', fontSize: 16 }}>
-                        {searchTerm ? '没有找到匹配的歌曲' : showLocalOnly ? '还没有本地谱子' : '还没有添加任何歌曲'}
+                        {searchTerm ? '没有找到匹配的歌曲' : sortMode === 'parsed' ? '还没有已解析的谱子' : sortMode === 'unparsed' ? '所有歌曲都有谱子了' : '还没有添加任何歌曲'}
                       </p>
                       <Button
                         type="primary"
                         icon={<PlusOutlined />}
-                        onClick={() => setIsAddModalOpen(true)}
+                        onClick={() => {
+                          setSortMode('latest');
+                          setSearchTerm('');
+                        }}
                         style={{ marginTop: 16 }}
                       >
-                        {searchTerm || showLocalOnly ? '查看全部' : '添加第一首歌曲'}
+                        查看全部
                       </Button>
                     </div>
                   ) : (

@@ -98,6 +98,25 @@ async function downloadImage(url, index) {
   }
 }
 
+// 从 Bing 搜索第一条结果 URL
+async function searchBingFirstResult(query) {
+  const url = `https://cn.bing.com/search?q=${encodeURIComponent(query)}`;
+  const resp = await axios.get(url, {
+    timeout: 15000,
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml',
+      'Accept-Language': 'zh-CN,zh;q=0.9',
+    }
+  });
+  const $ = cheerio.load(resp.data);
+  // Bing 搜索结果：.b_algo h2 a 为第一条结果
+  const firstLink = $('#b_results .b_algo h2 a').first();
+  if (!firstLink.length) return null;
+  const href = firstLink.attr('href');
+  return href || null;
+}
+
 // 从页面提取图片
 async function parseImagesFromUrl(url) {
   const resp = await axios.get(url, {
@@ -130,7 +149,7 @@ app.post('/guitar-api/songs', (req, res) => {
   if (!name) return res.status(400).json({ error: '歌曲名称不能为空' });
   const songs = loadSongs();
   if (songs.some(s => s.name === name)) return res.status(409).json({ error: '歌曲已存在' });
-  const song = { name, imgUrl: [] };
+  const song = { name, imgUrl: [], createdAt: new Date().toISOString() };
   songs.push(song);
   saveSongs(songs);
   res.status(201).json({ message: '歌曲创建成功', song });
@@ -200,6 +219,28 @@ app.post('/guitar-api/tabs/:title', async (req, res) => {
   }
 });
 
+// POST /guitar-api/tabs/:name/auto-fetch — 自动搜索并提取图片
+app.post('/guitar-api/tabs/:name/auto-fetch', async (req, res) => {
+  const { name } = req.params;
+  try {
+    // 1. 搜索 Bing 获取第一条结果 URL
+    const resultUrl = await searchBingFirstResult(`${name}吉他谱`);
+    if (!resultUrl) {
+      return res.status(404).json({ error: '未在 Bing 搜索到相关结果' });
+    }
+
+    // 2. 从该 URL 提取图片
+    const result = await parseImagesFromUrl(resultUrl);
+    if (result && result.type === 'image' && result.data && result.data.length > 0) {
+      res.json({ source_url: resultUrl, candidate_images: result.data });
+    } else {
+      res.status(404).json({ error: `已从 "${resultUrl}" 找到页面但未提取到图片`, source_url: resultUrl });
+    }
+  } catch (e) {
+    res.status(500).json({ error: `自动获取失败: ${e.message}` });
+  }
+});
+
 function deleteOldImages(oldUrls) {
   for (const url of oldUrls) {
     if (url.startsWith('/guitar-images/')) {
@@ -228,6 +269,9 @@ app.post('/guitar-api/tabs/:name/save', async (req, res) => {
     return res.json({ message: '顺序已更新' });
   }
 
+  // 首次添加谱子时记录时间
+  const hadImages = target.imgUrl && target.imgUrl.length > 0;
+
   // 删除旧的本地图片
   deleteOldImages(target.imgUrl);
 
@@ -238,6 +282,9 @@ app.post('/guitar-api/tabs/:name/save', async (req, res) => {
     if (local) localUrls.push(local);
   }
   target.imgUrl = localUrls;
+  if (!hadImages && localUrls.length > 0) {
+    target.createdAt = new Date().toISOString();
+  }
   saveSongs(songs);
   res.json({ message: '保存成功', count: localUrls.length });
 });
