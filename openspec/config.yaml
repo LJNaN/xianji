@@ -1,0 +1,23 @@
+schema: spec-driven
+
+# Project context
+context: |
+  Tech stack: React 18, Vite 5, Ant Design 5, Express 4, Node.js
+  Language: JavaScript (JSX)
+  UI: Ant Design 5 + @dnd-kit 拖拽 + react-zoom-pan-pinch 图片缩放
+  State: React hooks (useState, useEffect, useCallback)
+  Router: react-router-dom v6
+  Build: Vite 5
+  Data: JSON file storage (server/song_list.json)
+  Project: Guitar tab management app "弦集"
+  Domain: Guitar tablature collection & browsing
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours

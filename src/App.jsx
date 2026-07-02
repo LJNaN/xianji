@@ -150,7 +150,7 @@ function App() {
     document.body.style.webkitUserSelect = '';
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
+    if (over && active.id !== over.id) {
       setFilteredSongs((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
@@ -290,17 +290,17 @@ function App() {
               <svg width="28" height="28" viewBox="0 0 100 100" style={{ flexShrink: 0 }}>
                 <defs>
                   <linearGradient id="iconGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#52c41a"/>
-                    <stop offset="100%" stop-color="#389e0d"/>
+                    <stop offset="0%" stopColor="#52c41a"/>
+                    <stop offset="100%" stopColor="#389e0d"/>
                   </linearGradient>
                 </defs>
                 <path d="M50 12C24 12 20 30 20 44C20 62 28 80 50 88C72 80 80 62 80 44C80 30 76 12 50 12Z" fill="url(#iconGrad)"/>
-                <line x1="30" y1="30" x2="30" y2="74" stroke="#fff" stroke-width="2.8" stroke-linecap="round" opacity="0.9"/>
-                <line x1="37" y1="26" x2="37" y2="78" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.85"/>
-                <line x1="44" y1="24" x2="44" y2="80" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.8"/>
-                <line x1="56" y1="24" x2="56" y2="80" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity="0.8"/>
-                <line x1="63" y1="26" x2="63" y2="78" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.85"/>
-                <line x1="70" y1="30" x2="70" y2="74" stroke="#fff" stroke-width="2.8" stroke-linecap="round" opacity="0.9"/>
+                <line x1="30" y1="30" x2="30" y2="74" stroke="#fff" strokeWidth="2.8" strokeLinecap="round" opacity="0.9"/>
+                <line x1="37" y1="26" x2="37" y2="78" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" opacity="0.85"/>
+                <line x1="44" y1="24" x2="44" y2="80" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" opacity="0.8"/>
+                <line x1="56" y1="24" x2="56" y2="80" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" opacity="0.8"/>
+                <line x1="63" y1="26" x2="63" y2="78" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" opacity="0.85"/>
+                <line x1="70" y1="30" x2="70" y2="74" stroke="#fff" strokeWidth="2.8" strokeLinecap="round" opacity="0.9"/>
               </svg>
               <Title level={2} style={{ margin: 0 }}>弦集</Title>
               <span style={{ color: '#666', alignSelf: 'flex-end', paddingBottom: 2 }}>共 {filteredSongs.length} 首歌曲</span>
