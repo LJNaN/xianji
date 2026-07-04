@@ -793,7 +793,13 @@
   {
     "favorite": false,
     "name": "结婚记",
-    "imgUrl": []
+    "imgUrl": [
+      "/guitar-images/efba8842-4ee6-46a7-8804-4699a0a2bddc.jpg",
+      "/guitar-images/0cc7f98b-0267-47c6-8949-fc0aca73d113.jpg",
+      "/guitar-images/08da8e5b-aadf-4e6f-9da3-4b48128e4ff7.jpg",
+      "/guitar-images/30ad725d-097d-4bdf-b01b-e6a3d5e6e950.jpg"
+    ],
+    "createdAt": "2026-07-04T16:22:39.101Z"
   },
   {
     "favorite": false,
@@ -813,12 +819,22 @@
   {
     "favorite": false,
     "name": "因为爱情",
-    "imgUrl": []
+    "imgUrl": [
+      "/guitar-images/3731db28-3ed5-4d05-a385-145ab1418b10.webp",
+      "/guitar-images/4d47d586-eb7f-4794-88c1-d7a6420ffaf1.webp"
+    ],
+    "createdAt": "2026-07-04T16:22:31.593Z"
   },
   {
     "favorite": false,
     "name": "少年锦时",
-    "imgUrl": []
+    "imgUrl": [
+      "/guitar-images/72a45d70-3d85-43ed-aefb-83be081deb00.jpg",
+      "/guitar-images/9fdf6c37-bfeb-4bad-86d5-a027929b3940.jpg",
+      "/guitar-images/6d82c1b1-ac8d-4300-8b65-c3cffedc300e.jpg",
+      "/guitar-images/f9057efc-e0d2-4388-9d91-f707571d8f34.jpg"
+    ],
+    "createdAt": "2026-07-04T16:22:19.415Z"
   },
   {
     "favorite": false,
@@ -848,7 +864,12 @@
   {
     "favorite": false,
     "name": "你给我听好",
-    "imgUrl": []
+    "imgUrl": [
+      "/guitar-images/2117501d-818f-40a1-9aa6-c8d75b6ae0ff.webp",
+      "/guitar-images/a345bf04-6d36-4d74-b42a-c480ce913240.webp",
+      "/guitar-images/33f04fdb-2112-476f-8be8-5b25e0023360.webp"
+    ],
+    "createdAt": "2026-07-04T16:22:46.389Z"
   },
   {
     "favorite": false,
@@ -863,12 +884,23 @@
   {
     "favorite": false,
     "name": "你把我灌醉",
-    "imgUrl": []
+    "imgUrl": [
+      "/guitar-images/962c3289-15fc-48ac-89cd-1d0e10443846.webp",
+      "/guitar-images/f2d4e2b6-6d94-42a8-852a-8f79c236c77c.webp",
+      "/guitar-images/16aa9f60-924e-4a49-ba58-2de555dfb3d4.webp",
+      "/guitar-images/105f8651-e158-4b43-9487-0d2a20bad13d.webp"
+    ],
+    "createdAt": "2026-07-04T16:22:10.926Z"
   },
   {
     "favorite": false,
     "name": "可惜没如果",
-    "imgUrl": []
+    "imgUrl": [
+      "/guitar-images/f46f7aa8-adf2-4e7a-8d5d-97823490f7b7.png",
+      "/guitar-images/f1541364-a12f-447b-aca8-d83ec8f8e748.png",
+      "/guitar-images/d6e129e7-c7b4-4c9b-a74c-ea0104b6d213.png"
+    ],
+    "createdAt": "2026-07-04T16:30:33.733Z"
   },
   {
     "favorite": false,

@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.claude/
+.git/
+*.md
+.DS_Store
+Thumbs.db

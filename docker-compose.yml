@@ -1,0 +1,37 @@
+services:
+  # ---- Node.js API 后端 ----
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:5000:5000"
+    volumes:
+      - ./server/song_list.json:/app/song_list.json
+      - ./server/images:/app/images
+      - ./server/backups:/app/backups
+    restart: unless-stopped
+
+  # ---- Nginx 前端 ----
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # ---- 定时备份 ----
+  backup:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.backup
+    volumes:
+      - ./server/song_list.json:/app/song_list.json:ro
+      - ./server/images:/app/images:ro
+      - ./server/backups:/app/backups
+    restart: unless-stopped
+    depends_on:
+      - backend

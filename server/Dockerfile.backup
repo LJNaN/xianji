@@ -1,0 +1,13 @@
+FROM alpine:3.19
+
+RUN apk add --no-cache bash zip tzdata && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
+
+COPY backup.sh /app/backup.sh
+RUN chmod +x /app/backup.sh
+
+# 每天早上 9:00 执行备份
+RUN echo "0 9 * * * /app/backup.sh" > /etc/crontabs/root
+
+CMD ["crond", "-f", "-l", "2"]

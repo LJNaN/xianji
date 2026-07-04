@@ -5,6 +5,9 @@ dist/
 # 服务器上传的图片
 server/images/
 
+# Docker 备份目录
+server/backups/
+
 # OS 文件
 .DS_Store
 Thumbs.db

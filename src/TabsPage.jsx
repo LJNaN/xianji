@@ -562,9 +562,7 @@ function TabsPage() {
                   <img
                     src={proxyUrl(url)}
                     alt={`候选 ${i + 1}`}
-                    width={200}
-                    height={250}
-                    style={{ objectFit: 'contain', cursor: 'pointer', display: 'block' }}
+                    className="candidate-image"
                     onClick={() => toggleImageSelection(url)}
                   />
                   <Checkbox
