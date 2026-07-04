@@ -1,23 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, Spin, Alert, Typography, Input, Modal, message, ConfigProvider, Select } from 'antd';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  DragOverlay,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  rectSortingStrategy,
-} from '@dnd-kit/sortable';
-import { LoadingOutlined, EditOutlined, SaveOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons';
+import { LoadingOutlined, SearchOutlined, PlusOutlined, EditOutlined, CloseOutlined } from '@ant-design/icons';
 import SongItem from './SongItem';
 import './App.css';
 
@@ -31,12 +15,12 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newSongName, setNewSongName] = useState('');
-  const [activeId, setActiveId] = useState(null);
-  const [sortMode, setSortMode] = useState(() => localStorage.getItem('sortMode') || 'latest');
+  const [sortMode, setSortMode] = useState('latest');
   const [hasFetched, setHasFetched] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [favoriteSongs, setFavoriteSongs] = useState([]);
 
   // 加载歌单
   useEffect(() => {
@@ -51,6 +35,7 @@ function App() {
             id: item.id || `song-${idx}`,
             name: item.name || item,
             imgUrl: Array.isArray(item.imgUrl) ? item.imgUrl : [],
+            favorite: item.favorite || false,
             createdAt: item.createdAt || null,
           }))
           : [];
@@ -102,62 +87,33 @@ function App() {
       result.sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name));
     } else if (sortMode === 'nameDesc') {
       result.sort((a, b) => b.name.length - a.name.length || a.name.localeCompare(b.name));
-    } else if (sortMode !== 'custom') {
+    } else {
       result.sort((a, b) => sortByDate(a, b, false));
     }
-    // 'custom' 模式保持数组原序（即拖拽排序后的顺序）
 
     setFilteredSongs(result);
     setLoading(false);
   }, [searchTerm, songs, sortMode, hasFetched]);
 
-  // 记住用户选择的排序模式
+  // 提取最爱歌曲
   useEffect(() => {
-    localStorage.setItem('sortMode', sortMode);
-  }, [sortMode]);
+    setFavoriteSongs(songs.filter(s => s.favorite));
+  }, [songs]);
 
-  // dnd-kit 传感器配置（移动端优化）
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5,
-        delay: 100,
-        tolerance: 5,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 150,
-        tolerance: 5,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  // 拖拽开始
-  const handleDragStart = useCallback((event) => {
-    setActiveId(event.active.id);
-    document.body.style.userSelect = 'none';
-    document.body.style.webkitUserSelect = 'none';
-  }, []);
-
-  // 拖拽结束
-  const handleDragEnd = useCallback((event) => {
-    setActiveId(null);
-    document.body.style.userSelect = '';
-    document.body.style.webkitUserSelect = '';
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      setFilteredSongs((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
+  // 切换最爱
+  const handleToggleFavorite = async (name) => {
+    try {
+      const res = await fetch(`/guitar-api/songs/${encodeURIComponent(name)}/favorite`, {
+        method: 'PUT',
       });
+      if (!res.ok) throw new Error('请求失败');
+      const data = await res.json();
+      setSongs(prev => prev.map(s => s.name === name ? { ...s, favorite: data.favorite } : s));
+      setFilteredSongs(prev => prev.map(s => s.name === name ? { ...s, favorite: data.favorite } : s));
+    } catch (err) {
+      console.error('切换最爱失败:', err);
     }
-  }, []);
+  };
 
   // 删除歌曲
   const handleDelete = async (name) => {
@@ -225,37 +181,11 @@ function App() {
     }
   };
 
-  // 保存排序到后端
-  const saveOrder = useCallback(async () => {
-    try {
-      const response = await fetch('/guitar-api/songs/reorder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          song_names: filteredSongs.map(s => s.name)
-        })
-      });
-
-      if (!response.ok) throw new Error('保存失败');
-
-      // 同步主列表顺序
-      setSongs([...filteredSongs]);
-      setIsEditing(false);
-      message.success('排序已保存');
-    } catch (err) {
-      console.error('保存排序失败:', err);
-      message.error('保存失败，请重试');
-    }
-  }, [filteredSongs]);
-
   const handleSongClick = (name) => {
-    if (!isEditing) {
-      const song = songs.find(s => s.name === name);
-      navigate(`/detail/${encodeURIComponent(name)}`, { state: { song } });
-    }
+    if (isEditing) return;
+    const song = songs.find(s => s.name === name);
+    navigate(`/detail/${encodeURIComponent(name)}`, { state: { song } });
   };
-
-  const activeItem = filteredSongs.find((item) => item.id === activeId);
 
   if (loading) {
     return (
@@ -308,6 +238,26 @@ function App() {
           }
         >
           <>
+            {/* 最爱区域 */}
+            {favoriteSongs.length > 0 && (
+              <div style={{ marginBottom: 16, background: '#fff5f5', border: '1px solid #ffd7d5', borderRadius: 8, padding: '8px 8px 4px' }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#e8453c', marginBottom: 8, paddingLeft: 4 }}>
+                  ❤️ 最爱
+                </div>
+                <div className="song-grid" style={{ gap: 8 }}>
+                  {favoriteSongs.map((song) => (
+                    <SongItem
+                      key={song.id}
+                      song={song}
+                      favorite={song.favorite}
+                      onSongClick={handleSongClick}
+                      onToggleFavorite={handleToggleFavorite}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* 控制栏 */}
             <div className="control-bar">
               <Search
@@ -326,8 +276,8 @@ function App() {
               </Button>
               <Button
                 type={isEditing ? "primary" : "default"}
-                icon={isEditing ? <SaveOutlined /> : <EditOutlined />}
-                onClick={() => isEditing ? saveOrder() : (setSortMode('custom'), setIsEditing(true))}
+                icon={isEditing ? <CloseOutlined /> : <EditOutlined />}
+                onClick={() => setIsEditing(!isEditing)}
               >
                 {isEditing ? "完成" : "编辑"}
               </Button>
@@ -335,9 +285,7 @@ function App() {
                 value={sortMode}
                 onChange={(value) => setSortMode(value)}
                 className="control-sort"
-                disabled={isEditing}
                 options={[
-                  { value: 'custom', label: '自定义排序' },
                   { value: 'latest', label: '最新添加' },
                   { value: 'oldest', label: '最早添加' },
                   { value: 'nameAsc', label: '字数从少到多' },
@@ -348,66 +296,39 @@ function App() {
               />
             </div>
 
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext items={filteredSongs.map(s => s.id)} strategy={rectSortingStrategy}>
-                <div className="song-grid">
-                  {filteredSongs.length === 0 ? (
-                    <div className="empty-state">
-                      <div style={{ fontSize: 48, marginBottom: 12 }}>🎸</div>
-                      <p style={{ color: '#999', fontSize: 16 }}>
-                        {searchTerm ? '没有找到匹配的歌曲' : sortMode === 'parsed' ? '还没有已解析的谱子' : sortMode === 'unparsed' ? '所有歌曲都有谱子了' : '还没有添加任何歌曲'}
-                      </p>
-                      <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => {
-                          setSortMode('latest');
-                          setSearchTerm('');
-                        }}
-                        style={{ marginTop: 16 }}
-                      >
-                        查看全部
-                      </Button>
-                    </div>
-                  ) : (
-                    filteredSongs.map((song) => (
-                      <SongItem
-                        key={song.id}
-                        song={song}
-                        isEditing={isEditing}
-                        onSongClick={handleSongClick}
-                        onDelete={handleDelete}
-                        isDragging={activeId === song.id}
-                      />
-                    ))
-                  )}
+            <div className="song-grid">
+              {filteredSongs.length === 0 ? (
+                <div className="empty-state">
+                  <div style={{ fontSize: 48, marginBottom: 12 }}>🎸</div>
+                  <p style={{ color: '#999', fontSize: 16 }}>
+                    {searchTerm ? '没有找到匹配的歌曲' : sortMode === 'parsed' ? '还没有已解析的谱子' : sortMode === 'unparsed' ? '所有歌曲都有谱子了' : '还没有添加任何歌曲'}
+                  </p>
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => {
+                      setSortMode('latest');
+                      setSearchTerm('');
+                    }}
+                    style={{ marginTop: 16 }}
+                  >
+                    查看全部
+                  </Button>
                 </div>
-              </SortableContext>
-
-              {/* 拖拽浮层 - 提升移动端体验 */}
-              <DragOverlay>
-                {activeItem ? (
-                  <div className="drag-overlay">
-                    <Button
-                      size="large"
-                      style={{
-                        width: '100%',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {activeItem.name}
-                    </Button>
-                  </div>
-                ) : null}
-              </DragOverlay>
-            </DndContext>
+              ) : (
+                filteredSongs.map((song) => (
+                  <SongItem
+                    key={song.id}
+                    song={song}
+                    favorite={song.favorite}
+                    isEditing={isEditing}
+                    onSongClick={handleSongClick}
+                    onDelete={handleDelete}
+                    onToggleFavorite={handleToggleFavorite}
+                  />
+                ))
+              )}
+            </div>
           </>
         </Card>
 

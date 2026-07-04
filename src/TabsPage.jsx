@@ -5,8 +5,9 @@ import {
   Checkbox, message, Modal, Switch, Slider
 } from 'antd';
 import {
-  LoadingOutlined, LeftOutlined, PlayCircleOutlined, PauseCircleOutlined,
-  SearchOutlined, SettingOutlined, UploadOutlined, HolderOutlined
+  LoadingOutlined, LeftOutlined,
+  SearchOutlined, SettingOutlined, UploadOutlined, HolderOutlined,
+  HeartOutlined, HeartFilled
 } from '@ant-design/icons';
 import {
   DndContext, closestCenter, PointerSensor, KeyboardSensor,
@@ -47,6 +48,10 @@ function TabsPage() {
   const [isSliderDragging, setIsSliderDragging] = useState(false);
   const [autoFetching, setAutoFetching] = useState(false);
   const [autoFetchError, setAutoFetchError] = useState(null);
+  const [barVisible, setBarVisible] = useState(true);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [heartAnimating, setHeartAnimating] = useState(false);
+  const hideTimerRef = useRef(null);
 
   function getColumnsByViewport(w, h) {
     const ratio = w / h;
@@ -103,13 +108,10 @@ function TabsPage() {
         const found = songs.find(s => s.name === name);
         if (found) {
           setSong(found);
+          setIsFavorited(found.favorite || false);
+          setLoading(false);
           if (found.imgUrl && found.imgUrl.length > 0) {
-            setLoading(false);
             setSelectedImages(found.imgUrl);
-          } else {
-            // 没有谱子 -> 全屏 loading 保持，等自动获取完成后一起释放
-            setAutoFetching(true);
-            handleAutoFetch();
           }
         } else {
           setError('歌曲未找到');
@@ -172,7 +174,6 @@ function TabsPage() {
       setAutoFetchError('自动获取请求失败');
     } finally {
       setAutoFetching(false);
-      setLoading(false);
     }
   };
 
@@ -215,6 +216,24 @@ function TabsPage() {
 
   const handleBack = () => {
     navigate('/');
+  };
+
+  const handleToggleFavorite = async () => {
+    const newFav = !isFavorited;
+    setIsFavorited(newFav);
+    if (newFav) {
+      setHeartAnimating(true);
+      setTimeout(() => setHeartAnimating(false), 800);
+    }
+    try {
+      const res = await fetch(`/guitar-api/songs/${encodeURIComponent(name)}/favorite`, { method: 'PUT' });
+      if (!res.ok) throw new Error('请求失败');
+      const data = await res.json();
+      setIsFavorited(data.favorite);
+    } catch (err) {
+      console.error('切换最爱失败:', err);
+      setIsFavorited(isFavorited);
+    }
   };
 
   const handleClearImages = async () => {
@@ -341,6 +360,32 @@ function TabsPage() {
   }, [isAutoScrolling, scrollSpeed]);
 
 
+
+  // 浮动栏自动隐藏：仅看图时有效，2秒无操作隐藏
+  useEffect(() => {
+    if (selectedImages.length === 0 || showSelector) return;
+
+    const showBar = () => {
+      setBarVisible(true);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = setTimeout(() => setBarVisible(false), 2000);
+    };
+
+    showBar();
+
+    // 在 document 层监听，避免被 react-zoom-pan-pinch 等组件拦截
+    document.addEventListener('mousemove', showBar);
+    document.addEventListener('touchstart', showBar, { passive: true });
+    document.addEventListener('touchmove', showBar, { passive: true });
+
+    return () => {
+      document.removeEventListener('mousemove', showBar);
+      document.removeEventListener('touchstart', showBar);
+      document.removeEventListener('touchmove', showBar);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, [selectedImages.length, showSelector]);
+
   if (loading) {
     return (
       <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -363,51 +408,62 @@ function TabsPage() {
 
   return (
     <div className="app-container detail-container">
-      <Card
-        title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <Card className="detail-card">
+        {/* 顶部栏 - 始终显示 */}
+        {!loading && !error && (
+          <div className={`floating-bar${!barVisible ? ' floating-bar-hidden' : ''}`}>
+            <div className="floating-left">
               <Button onClick={handleBack} icon={<LeftOutlined />} size="small" shape="circle" />
-              <Title level={3} className="detail-title">{name}</Title>
+              <span className="floating-title">{name}</span>
             </div>
+
             {selectedImages.length > 0 && !showSelector && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0, flex: 1, maxWidth: '400px', justifyContent: 'space-between' }}>
-                <Space size={4} className="detail-scroll-toggle">
-                  <Switch
-                    size="small"
-                    checked={isAutoScrolling}
-                    onChange={(checked) => setIsAutoScrolling(checked)}
-                    checkedChildren={<PlayCircleOutlined />}
-                    unCheckedChildren={<PauseCircleOutlined />}
-                  />
-                  <span className="detail-scroll-label">自动滚动</span>
-                </Space>
-                <div className="detail-scroll-slider-row">
+              <div className="floating-center">
+                <Switch
+                  size="small"
+                  checked={isAutoScrolling}
+                  onChange={(checked) => setIsAutoScrolling(checked)}
+                />
+                <span className="floating-label">自动滚动</span>
+                <div className="floating-slider-row">
                   <Slider
                     min={0}
                     max={10}
                     step={0.1}
                     value={scrollSpeed}
                     onChange={(value) => setScrollSpeed(value)}
-                    className="detail-scroll-slider"
+                    className="floating-slider"
                     tooltip={{ open: false }}
                     onFocus={() => setIsSliderDragging(true)}
                     onBlur={() => setIsSliderDragging(false)}
                   />
-                  <span className="detail-scroll-speed">{scrollSpeed.toFixed(1)}x</span>
+                  <span className="floating-speed">{scrollSpeed.toFixed(1)}x</span>
                 </div>
               </div>
             )}
-            <Button
-              type="text"
-              icon={<SettingOutlined />}
-              onClick={() => setSettingsOpen(true)}
-              style={{ width: 'auto' }}
-            />
+
+            <div className="floating-right">
+              <div className={`heart-btn-wrapper ${heartAnimating ? 'heart-pop' : ''}`}>
+                <Button
+                  type="text"
+                  icon={isFavorited ? <HeartFilled style={{ color: '#e8453c' }} /> : <HeartOutlined />}
+                  onClick={handleToggleFavorite}
+                  className="floating-settings-btn"
+                />
+              </div>
+              {selectedImages.length > 0 && !showSelector && (
+                <Button
+                  type="text"
+                  icon={<SettingOutlined />}
+                  onClick={() => setSettingsOpen(true)}
+                  className="floating-settings-btn"
+                />
+              )}
+            </div>
           </div>
-        }
-        className="detail-card"
-      >
+        )}
+
+        {/* 图片查看器 */}
         {selectedImages.length > 0 && !showSelector && (
           <div className="detail-body">
             <TransformWrapper
@@ -421,13 +477,14 @@ function TabsPage() {
               limitToBounds={true}
             >
               <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
-                <div className="tabs-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+                <div className="tabs-grid">
                   {selectedImages.map((url, i) => (
                     <img
                       key={i}
                       src={proxyUrl(url)}
                       alt={`谱 ${i + 1}`}
                       className="detail-image"
+                      style={{ width: `calc((100% - ${(columns - 1) * 8}px) / ${columns})`, flex: `0 0 calc((100% - ${(columns - 1) * 8}px) / ${columns})` }}
                     />
                   ))}
                 </div>
@@ -437,81 +494,50 @@ function TabsPage() {
         )}
 
         {selectedImages.length === 0 && !showSelector && (
-          <div className="detail-body" style={{ padding: 20 }}>
+          <div className="detail-body" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {autoFetching ? (
-              <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
-                <p style={{ marginTop: 12, color: '#666' }}>正在自动搜索 &ldquo;{name}吉他谱&rdquo;...</p>
-              </div>
-            ) : autoFetchError ? (
-              <div>
-                <Text>暂无吉他谱。</Text>
-                <Alert
-                  message="自动获取失败"
-                  description={autoFetchError}
-                  type="warning"
-                  showIcon
-                  style={{ marginTop: 12, marginBottom: 12 }}
-                />
-                <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <Button type="primary" onClick={handleAutoFetch} icon={<SearchOutlined />}>
-                    重试
-                  </Button>
-                  <Button
-                    target="_blank"
-                    href={`https://cn.bing.com/search?q=${encodeURIComponent(name)}吉他谱`}
-                    icon={<SearchOutlined />}
-                  >
-                    去 Bing 搜索
-                  </Button>
-                  <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
-                    本地上传
-                  </Button>
-                  <Input
-                    placeholder="或直接输入吉他谱页面URL"
-                    value={customUrl}
-                    onChange={(e) => setCustomUrl(e.target.value)}
-                    style={{ width: '360px' }}
-                  />
-                  <Button
-                    onClick={handleFetchFromUrl}
-                    loading={fetching}
-                    disabled={!customUrl.trim()}
-                  >
-                    提取图片
-                  </Button>
-                </div>
+              <div style={{ textAlign: 'center' }}>
+                <Spin indicator={<LoadingOutlined style={{ fontSize: 28 }} spin />} />
+                <p style={{ marginTop: 16, color: '#666', fontSize: 15 }}>正在自动搜索 &ldquo;{name}吉他谱&rdquo;...</p>
               </div>
             ) : (
-              <div>
-                <Text>暂无吉他谱。</Text>
-                <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <Button type="primary" onClick={handleAutoFetch} icon={<SearchOutlined />}>
-                    自动获取
+              <div style={{ textAlign: 'center', width: '100%', maxWidth: 500, padding: '0 20px', boxSizing: 'border-box' }}>
+                <div style={{ fontSize: 48, marginBottom: 12, opacity: 0.3 }}>🎸</div>
+                <Text type="secondary" style={{ fontSize: 15, display: 'block', marginBottom: 16 }}>
+                  暂无吉他谱，试试以下方式添加
+                </Text>
+                {autoFetchError && (
+                  <Alert
+                    message="自动获取失败"
+                    description={autoFetchError}
+                    type="warning"
+                    showIcon
+                    style={{ marginBottom: 16, textAlign: 'left' }}
+                  />
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <Button type="primary" onClick={handleAutoFetch} icon={<SearchOutlined />} size="large" block>
+                    {autoFetchError ? '重试自动获取' : '自动获取'}
                   </Button>
                   <Button
                     target="_blank"
                     href={`https://cn.bing.com/search?q=${encodeURIComponent(name)}吉他谱`}
                     icon={<SearchOutlined />}
+                    block
                   >
                     去 Bing 搜索
                   </Button>
-                  <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
+                  <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()} block>
                     本地上传
                   </Button>
-                  <Input
-                    placeholder="或直接输入吉他谱页面URL"
+                  <Input.Search
+                    placeholder="或输入吉他谱页面URL"
                     value={customUrl}
                     onChange={(e) => setCustomUrl(e.target.value)}
-                    style={{ width: '360px' }}
-                  />
-                  <Button
-                    onClick={handleFetchFromUrl}
                     loading={fetching}
-                    disabled={!customUrl.trim()}
-                  >
-                    提取图片
-                  </Button>
+                    enterButton="提取"
+                    onSearch={handleFetchFromUrl}
+                  />
                 </div>
               </div>
             )}
@@ -519,7 +545,7 @@ function TabsPage() {
         )}
 
         {showSelector && (
-          <div className="detail-body" style={{ padding: 20 }}>
+          <div className="detail-body" style={{ padding: '0 20px 20px' }}>
             <Title level={4} style={{ margin: '10px 0' }}>请选择有效的吉他谱图片</Title>
             <Space wrap size={[8, 16]} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
               {candidateImages.map((url, i) => (

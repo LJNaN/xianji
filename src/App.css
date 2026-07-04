@@ -19,25 +19,11 @@ body {
   padding: 8px;
 }
 
-/* 拖拽浮层样式 */
-.drag-overlay {
-  cursor: grabbing;
-  touch-action: none;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  border-radius: 6px;
-  z-index: 1000;
-  background: white;
-  padding: 2px;
-}
-
 .song-button-container {
   position: relative;
   max-width: 90%;
   min-width: 80px;
-  /* 移除所有拖拽动画 */
 }
-
-/* 完全移除拖拽相关样式 */
 
 /* 绿点样式 */
 .green-dot {
@@ -48,7 +34,7 @@ body {
   height: 8px;
   background-color: #389e0d;
   border-radius: 50%;
-  border: 1.5px solid white;
+  border: 2px solid white;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -100,11 +86,135 @@ body {
 }
 
 .detail-card .ant-card-body {
-  padding: 0;
+  padding: 48px 0 0 0;
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* 浮动控制栏 - 固定在顶部，不滚动 */
+.floating-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.floating-bar-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.floating-bar > * {
+  pointer-events: auto;
+}
+
+
+.floating-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.floating-title {
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.floating-center {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  max-width: 420px;
+}
+
+.floating-right {
+  flex-shrink: 0;
+}
+
+.floating-settings-btn {
+  color: #555 !important;
+}
+
+/* 爱心按钮动画 */
+.heart-btn-wrapper {
+  display: inline-flex;
+  position: relative;
+}
+
+.heart-pop .ant-btn {
+  animation: heart-bounce 0.6s ease;
+}
+
+.heart-pop::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(232, 69, 60, 0.15);
+  animation: heart-ripple 0.6s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes heart-bounce {
+  0% { transform: scale(1); }
+  20% { transform: scale(1.4); }
+  40% { transform: scale(0.85); }
+  60% { transform: scale(1.2); }
+  80% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes heart-ripple {
+  0% { transform: scale(0.5); opacity: 0.6; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+.floating-label {
+  font-size: 12px;
+  color: #555;
+  white-space: nowrap;
+}
+
+.floating-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 80px;
+}
+
+.floating-slider {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.floating-speed {
+  font-size: 12px;
+  color: #555;
+  font-variant-numeric: tabular-nums;
 }
 
 .detail-card .ant-card-body .detail-body {
@@ -125,53 +235,11 @@ body {
   height: 100%;
 }
 
-
-.detail-title {
-  margin: 0 !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-  font-size: 18px !important;
-}
-
-.detail-scroll-toggle {
-  margin-top: -4px;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-}
-
-.detail-scroll-label {
-  font-size: 12px;
-  color: #666;
-  white-space: nowrap;
-}
-
-.detail-scroll-slider-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  flex: 1;
-  max-width: 280px;
-}
-
-.detail-scroll-slider {
-  flex: 1;
-  min-width: 100px;
-}
-
-.detail-scroll-speed {
-  font-size: 12px;
-  color: #666;
-  text-align: left;
-  flex-shrink: 0;
-}
-
 /* 缩放图片容器 */
 .tabs-grid {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -245,7 +313,7 @@ body {
   }
 
   .preview-image {
-    height: 45px;
+    height: 44px;
   }
 
   .control-bar .control-search {
@@ -267,20 +335,43 @@ body {
     gap: 4px;
   }
 
+  .song-grid .ant-btn {
+    font-size: 14px;
+    height: 28px;
+    padding: 0 11px;
+    line-height: 1.8;
+  }
+
+  .green-dot {
+    width: 6px;
+    height: 6px;
+    bottom: 2px;
+    right: 2px;
+  }
+
   .preview-image {
-    height: 35px;
+    height: 36px;
   }
 
-  .detail-title {
+  .floating-title {
     display: none;
   }
 
-  .detail-scroll-label {
+  .floating-label {
     display: none;
   }
 
-  .detail-scroll-slider {
+  .floating-slider-row {
     min-width: 60px;
+  }
+
+  .floating-bar {
+    padding: 6px 8px;
+    gap: 24px;
+  }
+
+  .floating-center {
+    gap: 4px;
   }
 
 }

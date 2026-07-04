@@ -1,566 +1,24 @@
 [
   {
-    "name": "画",
-    "imgUrl": [
-      "/guitar-images/981f3dfa-fdd3-45d4-890b-b041d12a5eec.png",
-      "/guitar-images/287ef5d3-34bd-477f-aa2e-cdb2d37e3642.png",
-      "/guitar-images/47841c71-bd64-4616-a282-573b451f6cb5.png"
-    ],
-    "createdAt": "2026-07-01T14:59:43.198Z"
-  },
-  {
-    "name": "儿歌",
-    "imgUrl": [
-      "/guitar-images/cca770bf-43aa-4920-a7cc-52fab5110bd3.gif",
-      "/guitar-images/fb7ca8d6-ffca-4885-b17f-b3517c3ce631.gif"
-    ],
-    "createdAt": "2026-07-02T02:38:30.020Z"
-  },
-  {
-    "name": "玫瑰",
-    "imgUrl": [
-      "/guitar-images/323b698b-ec04-45af-a841-50068f3258ba.png",
-      "/guitar-images/522abe68-b72c-48d6-8cfd-d56ac688ada9.png",
-      "/guitar-images/a225b2ed-1c12-417e-ad25-6f8706a02375.png"
-    ]
-  },
-  {
-    "name": "虚拟",
-    "imgUrl": [
-      "/guitar-images/5641559e-91ae-4892-ac34-abc8042bb273.png",
-      "/guitar-images/bbf2c341-2600-4265-b800-bb83407f028b.png"
-    ],
-    "createdAt": "2026-07-02T02:38:37.415Z"
-  },
-  {
-    "name": "小宇",
-    "imgUrl": [
-      "/guitar-images/76adf3c8-9bb5-4e81-bea1-3964b94cb0bf.png",
-      "/guitar-images/522a0100-e7c6-42f3-810e-555e3ea23211.png"
-    ],
-    "createdAt": "2026-07-02T02:38:41.501Z"
-  },
-  {
-    "name": "老街",
-    "imgUrl": [
-      "/guitar-images/960b73dd-5056-47a5-9e02-a59967bc073f.png",
-      "/guitar-images/0059301a-5ca6-4b53-b67e-000fa5134ba4.png",
-      "/guitar-images/c19faced-9a99-4f75-b6bf-87a5e6445ab3.png"
-    ],
-    "createdAt": "2026-07-01T15:22:00.081Z"
-  },
-  {
-    "name": "傲寒",
-    "imgUrl": [
-      "/guitar-images/7135c861-5bbd-4c82-9a77-f785a3c6e10f.jpg",
-      "/guitar-images/fdf4eeb4-d86e-4b66-ad33-11cc350c4374.jpg",
-      "/guitar-images/130ae8ab-d83d-4585-b803-b67b1a5e1a96.jpg"
-    ],
-    "createdAt": "2026-07-01T15:42:49.262Z"
-  },
-  {
-    "name": "幻听",
-    "imgUrl": [
-      "/guitar-images/ba0bf68e-8b32-49d8-8b70-057c38f530eb.png",
-      "/guitar-images/bc1314cc-6541-4f79-bd2d-7524c441b7fe.png",
-      "/guitar-images/680bff21-41ec-435b-8807-e955a86cd7ec.png"
-    ],
-    "createdAt": "2026-07-01T15:00:39.972Z"
-  },
-  {
-    "name": "走马",
-    "imgUrl": [
-      "/guitar-images/7b86335d-8911-4c3a-834b-b4083286a2fd.webp",
-      "/guitar-images/a046714f-7a45-4c29-96a8-e38ab2ac4b3b.webp",
-      "/guitar-images/43bdd176-7089-4884-b9a2-c7ad4ec78983.webp"
-    ],
-    "createdAt": "2026-07-02T03:47:50.411Z"
-  },
-  {
-    "name": "红尘客栈",
-    "imgUrl": [
-      "/guitar-images/96d2a97b-60e3-49ca-b615-9554197ac306.webp",
-      "/guitar-images/8572e3af-02b3-4a8f-8747-5563dc2fed7e.webp",
-      "/guitar-images/d7c6d363-00cf-49f7-93c0-68a364f3e1c9.webp"
-    ],
-    "createdAt": "2026-07-01T14:58:27.126Z"
-  },
-  {
-    "name": "私奔",
-    "imgUrl": [
-      "/guitar-images/79b441ab-5f14-4fd7-a34b-9bbee42a5340.jpg",
-      "/guitar-images/70e8303c-d732-40ae-a7e1-41d4c0d3a2f3.jpg"
-    ],
-    "createdAt": "2026-07-01T16:07:46.534Z"
-  },
-  {
-    "name": "鸽子",
-    "imgUrl": [
-      "/guitar-images/189696c0-de9a-4778-82e5-3303c5364348.webp",
-      "/guitar-images/a3250758-a160-42e9-8dc6-db66e3454fa4.webp",
-      "/guitar-images/3e7f6fbd-3bde-4cf7-8a2b-21efb32ca6dc.webp"
-    ],
-    "createdAt": "2026-07-02T03:40:18.180Z"
-  },
-  {
-    "name": "晴天",
-    "imgUrl": [
-      "/guitar-images/fcd68e49-8aaa-4eff-bbb5-f3c69b1fdd37.webp",
-      "/guitar-images/99ee9280-a0fb-421f-bf44-7facaf3fe9a3.webp",
-      "/guitar-images/c27c6fb4-d85b-4cb2-80f1-66b25918e3d2.webp"
-    ],
-    "createdAt": "2026-07-02T02:44:56.282Z"
-  },
-  {
-    "name": "宝贝",
-    "imgUrl": [
-      "/guitar-images/7e380b2f-c61d-4e14-815a-04660151bd85.jpg",
-      "/guitar-images/df69ade8-a310-4329-80ea-c9369c79617e.jpg"
-    ],
-    "createdAt": "2026-07-01T15:00:51.141Z"
-  },
-  {
-    "name": "形容",
-    "imgUrl": [
-      "/guitar-images/f23bca84-c30e-4a5f-bac2-76ef824dd16b.png",
-      "/guitar-images/78428e6e-e2e3-4430-8267-e40ec1e4c60f.png",
-      "/guitar-images/13cd6a08-4cd4-4782-a51c-3828115e2b6b.png",
-      "/guitar-images/673531e4-cd48-4110-9d64-f9b569bbad83.png"
-    ]
-  },
-  {
-    "name": "偏爱",
-    "imgUrl": [
-      "/guitar-images/30716e12-2952-4e5d-9540-07f55f8b66dd.webp",
-      "/guitar-images/a2e3e5a4-d007-4d5d-86d4-6a6f916fcf32.webp"
-    ],
-    "createdAt": "2026-07-02T03:49:21.227Z"
-  },
-  {
-    "name": "成都",
-    "imgUrl": [
-      "/guitar-images/6b1257ee-89fc-46d4-8e08-c4e0627c862a.webp",
-      "/guitar-images/e9d2ac7c-a65d-4fd4-8fd3-9af0df80cf0a.webp",
-      "/guitar-images/fdf228bd-22c1-40e2-9430-fc60718db75d.webp"
-    ],
-    "createdAt": "2026-07-01T15:00:26.058Z"
-  },
-  {
-    "name": "泡沫",
-    "imgUrl": [
-      "/guitar-images/3cf05c56-c32e-447b-94fe-1664fb179a9e.png",
-      "/guitar-images/5ca21c5b-3a57-4990-a682-cc5cc0478a5a.png"
-    ],
-    "createdAt": "2026-07-01T16:01:54.678Z"
-  },
-  {
-    "name": "温柔",
-    "imgUrl": [
-      "/guitar-images/2413885e-39b9-4ee4-8aa4-4ed0fd80a135.webp",
-      "/guitar-images/4cb23579-306a-4c64-80b7-12394c7f1e66.webp",
-      "/guitar-images/6710d438-25ff-4eab-a169-705aa1b2fcf5.webp"
-    ],
-    "createdAt": "2026-07-02T03:01:29.387Z"
-  },
-  {
-    "name": "米店",
-    "imgUrl": [
-      "/guitar-images/895f9d77-c4f8-43a6-95ef-029cf23333c3.png",
-      "/guitar-images/c1f1d41f-58a8-4499-b081-2d3fe490544b.png"
-    ],
-    "createdAt": "2026-07-02T05:54:34.593Z"
-  },
-  {
-    "name": "遇见",
-    "imgUrl": [
-      "/guitar-images/f9cdd5cd-bb63-41a0-8688-cd19e40de1aa.webp",
-      "/guitar-images/eca0810e-a851-4f16-9027-95b87a708a52.webp",
-      "/guitar-images/2c488da5-f2c1-4bdd-b095-d084a7be814d.webp"
-    ],
-    "createdAt": "2026-07-02T03:20:56.170Z"
-  },
-  {
-    "name": "说谎",
-    "imgUrl": [
-      "/guitar-images/402cbbeb-45a5-4d1e-aec1-ef674f4ab82f.png",
-      "/guitar-images/c5b18c22-eaf9-46e3-99c6-35c9be4c3e19.png",
-      "/guitar-images/a89034d0-e995-4a1a-bd3d-bd124be8a11d.png"
-    ],
-    "createdAt": "2026-07-02T03:05:48.827Z"
-  },
-  {
-    "name": "故梦",
-    "imgUrl": [
-      "/guitar-images/3b1caa0b-9b23-413b-bdfd-9b4b90eb163b.png",
-      "/guitar-images/985d8085-682a-4b39-9954-8e557cde2b55.png",
-      "/guitar-images/e3dcafb4-7673-4fa7-b5ec-8333b97c074c.png",
-      "/guitar-images/4d0e066a-8a86-49da-8407-02de1baad7de.png"
-    ],
-    "createdAt": "2026-07-02T02:55:21.405Z"
-  },
-  {
-    "name": "心墙",
-    "imgUrl": [
-      "/guitar-images/aa855a3f-4a07-4ba8-baea-c76fe8c2c388.jpg"
-    ],
-    "createdAt": "2026-07-02T03:02:13.542Z"
-  },
-  {
-    "name": "夜车",
-    "imgUrl": [
-      "/guitar-images/04dffd05-2416-4493-aa5c-a07fce20d73d.png",
-      "/guitar-images/77d7a63e-7118-450b-ac0d-09f9da4b46ba.png",
-      "/guitar-images/f5fcd625-40cd-4001-b12b-bda3603a7986.png"
-    ],
-    "createdAt": "2026-07-02T03:50:08.598Z"
-  },
-  {
-    "name": "彩虹",
-    "imgUrl": [
-      "/guitar-images/a86c12bd-69c0-4844-960d-ea7ac1cccc16.jpg",
-      "/guitar-images/9161142a-8861-44b3-8f3b-ada0984e976f.jpg",
-      "/guitar-images/bffbdf22-e564-4a03-8d22-0c877691350e.jpg"
-    ],
-    "createdAt": "2026-07-02T03:21:03.267Z"
-  },
-  {
-    "name": "白羊",
-    "imgUrl": [
-      "/guitar-images/9ba23f36-9db7-42f2-81be-2b456a080ccf.webp"
-    ],
-    "createdAt": "2026-07-02T03:14:50.821Z"
-  },
-  {
-    "name": "花海",
-    "imgUrl": [
-      "/guitar-images/5b8248f4-e746-4ed1-8099-ade3b9918276.png",
-      "/guitar-images/e2e0750e-5e95-4589-a4f4-2ac9e49f4c9d.png",
-      "/guitar-images/09fcc18b-8a60-4f01-9a70-a1b738a6ef0f.png"
-    ],
-    "createdAt": "2026-07-02T03:48:13.939Z"
-  },
-  {
-    "name": "唯一",
-    "imgUrl": [
-      "/guitar-images/e75e3093-692d-4f50-b9f4-bc8a1c4d962a.jpg",
-      "/guitar-images/1d388f38-e38b-454f-a5f9-72f69e4cdc66.jpg"
-    ],
-    "createdAt": "2026-07-02T03:15:21.560Z"
-  },
-  {
-    "name": "雨爱",
-    "imgUrl": [
-      "/guitar-images/9a8eeef1-974a-4466-b0a9-94ffcec0a848.png",
-      "/guitar-images/a3415192-ce5c-4fb8-acec-91a3b55d287a.png"
-    ],
-    "createdAt": "2026-07-02T02:45:38.725Z"
-  },
-  {
-    "name": "星晴",
-    "imgUrl": [
-      "/guitar-images/bd6e0e02-62c0-4142-a00d-b681ae66996a.png",
-      "/guitar-images/7b9fcd21-4f17-4303-b515-634bb0f648b9.png"
-    ],
-    "createdAt": "2026-07-02T02:42:14.694Z"
-  },
-  {
-    "name": "小幸运",
-    "imgUrl": [
-      "/guitar-images/5632da2c-9d79-4048-a099-16db5ce3d512.webp",
-      "/guitar-images/60c62487-7f60-439d-803a-5bca12a8ecc6.webp",
-      "/guitar-images/0749dd4a-8893-43de-b49c-f2b15d02734a.webp"
-    ],
-    "createdAt": "2026-07-02T03:47:35.969Z"
-  },
-  {
-    "name": "南山南",
-    "imgUrl": [
-      "/guitar-images/f9ffe24d-5e61-4034-ae92-79f20a6564b0.webp",
-      "/guitar-images/fe2da171-5af7-4532-81e2-e648eb88c60a.webp",
-      "/guitar-images/79c9b1bc-97d1-42bc-9cce-63acc886a1e4.webp",
-      "/guitar-images/80c3a25d-8225-4f09-b1d4-f7de2c54eb7c.webp"
-    ],
-    "createdAt": "2026-07-02T02:38:54.202Z"
-  },
-  {
-    "name": "我记得",
-    "imgUrl": [
-      "/guitar-images/87c47432-0a4c-4949-977b-83c8bc099b65.png",
-      "/guitar-images/fd86d8d7-6a5c-415a-beed-dfd00b3e3d0b.png",
-      "/guitar-images/8252a56f-005e-481c-9485-01c6cba6b709.png",
-      "/guitar-images/a4c81ba9-d1b4-4711-81ac-00497ef2e6ff.png"
-    ],
-    "createdAt": "2026-07-02T03:00:37.437Z"
-  },
-  {
-    "name": "恶作剧",
-    "imgUrl": [
-      "/guitar-images/9c909606-f9d9-4e17-9ce2-383698a81dba.webp",
-      "/guitar-images/35977770-1c71-4710-94f6-2221b15236e6.webp",
-      "/guitar-images/aff2f80a-3691-4b4a-bcb0-fe7a1e61d8c5.webp"
-    ],
-    "createdAt": "2026-07-02T02:42:06.642Z"
-  },
-  {
-    "name": "七月上",
-    "imgUrl": [
-      "/guitar-images/8c20b005-bf09-472b-ae14-2ca94a4b4b2a.webp",
-      "/guitar-images/c3a5e1da-c60d-4329-80d7-863afc697098.webp"
-    ],
-    "createdAt": "2026-07-02T03:06:25.449Z"
-  },
-  {
-    "name": "明明就",
-    "imgUrl": []
-  },
-  {
-    "name": "水星记",
-    "imgUrl": [
-      "/guitar-images/da7af390-6cc9-414a-b570-2463819468d7.png",
-      "/guitar-images/ae2ba888-baa8-4fc1-8e85-d64538fec361.png",
-      "/guitar-images/5e5ab96f-5219-4362-bd10-6f48f49753a8.png",
-      "/guitar-images/00204937-4161-4413-9805-bb58a42b77a3.png"
-    ],
-    "createdAt": "2026-07-02T03:05:56.711Z"
-  },
-  {
-    "name": "太聪明",
-    "imgUrl": [
-      "/guitar-images/dc5ed246-7ed4-4dbb-8c34-346322c49113.webp",
-      "/guitar-images/16fcb923-848f-4d85-beed-4d5fbc75da69.webp"
-    ],
-    "createdAt": "2026-07-02T03:48:08.427Z"
-  },
-  {
-    "name": "圣诞结",
-    "imgUrl": []
-  },
-  {
-    "name": "董小姐",
-    "imgUrl": [
-      "/guitar-images/794fd070-2b0b-471c-bd66-cd394fbeb7bf.png",
-      "/guitar-images/14ec1772-61ca-467e-a7ec-55043f3b9093.png",
-      "/guitar-images/b366eae2-0221-48e4-a0a0-230647addc5b.png"
-    ],
-    "createdAt": "2026-07-02T03:47:55.167Z"
-  },
-  {
-    "name": "带我走",
-    "imgUrl": [
-      "/guitar-images/9ffacfef-0edc-4eda-93fe-b3d9aefb9d21.png",
-      "/guitar-images/77ba4769-ce12-44c7-a0ed-41296cd6bff0.png",
-      "/guitar-images/62398e75-a0b2-4723-8e50-46e8f244ba69.png"
-    ],
-    "createdAt": "2026-07-02T03:49:28.206Z"
-  },
-  {
-    "name": "达尔文",
-    "imgUrl": [
-      "/guitar-images/8b647f54-a975-42cf-a8a9-5bf90ac1cfb0.png",
-      "/guitar-images/6dceca7c-e390-45fc-bb41-a3c3226422ee.png"
-    ],
-    "createdAt": "2026-07-01T15:40:00.162Z"
-  },
-  {
-    "name": "莉莉安",
-    "imgUrl": []
-  },
-  {
-    "name": "小酒窝",
-    "imgUrl": [
-      "/guitar-images/6c6eb526-f307-4f2f-b4b6-a9ce5fbbdd16.jpg",
-      "/guitar-images/82a30a63-235e-4fdf-b3fb-6532854c77c7.jpg"
-    ],
-    "createdAt": "2026-07-02T02:41:00.250Z"
-  },
-  {
-    "name": "狂恋你",
-    "imgUrl": [
-      "/guitar-images/97216806-fa0b-4972-afdb-a208304527c1.jpg",
-      "/guitar-images/0509764c-b6f3-435c-ac51-f97d961122eb.jpg",
-      "/guitar-images/fc8cf8fb-b4d9-4a57-9b85-b61b4226c27b.jpg",
-      "/guitar-images/24e6638b-50c3-46e6-aff4-d374bf158d1c.jpg"
-    ],
-    "createdAt": "2026-07-02T03:44:28.628Z"
-  },
-  {
-    "name": "安和桥",
-    "imgUrl": [
-      "/guitar-images/608360ab-115f-4bd3-9e77-86d5e101fab8.png",
-      "/guitar-images/bb007618-5e7b-481b-809a-af9dfd3c3761.png"
-    ],
-    "createdAt": "2026-07-02T02:39:09.466Z"
-  },
-  {
-    "name": "醒着醉",
-    "imgUrl": [
-      "/guitar-images/769e2886-da01-49b9-8368-34162042a6b6.jpg",
-      "/guitar-images/60d71816-e9bf-432f-8bca-cb8edd00ea8a.jpg"
-    ],
-    "createdAt": "2026-07-02T03:43:59.532Z"
-  },
-  {
-    "name": "结婚记",
-    "imgUrl": []
-  },
-  {
-    "name": "年少有为",
-    "imgUrl": [
-      "/guitar-images/8960c027-be84-4ac9-8583-251feea3691a.webp",
-      "/guitar-images/3e0dd3cd-4108-4fe2-828a-9ba1474fcd47.webp",
-      "/guitar-images/c564910d-53c6-4f27-a0e2-dfb457415602.webp"
-    ],
-    "createdAt": "2026-07-02T03:43:54.398Z"
-  },
-  {
-    "name": "爱我别走",
-    "imgUrl": [
-      "/guitar-images/534060be-c4ad-41b2-85c0-306cb472d947.webp",
-      "/guitar-images/28d782b6-2554-4b9e-be18-65028d367076.webp"
-    ],
-    "createdAt": "2026-07-02T03:48:57.833Z"
-  },
-  {
-    "name": "忽然之间",
-    "imgUrl": [
-      "/guitar-images/63c7dccf-2d48-40ea-b29c-a2b883891b25.webp"
-    ],
-    "createdAt": "2026-07-02T03:48:44.236Z"
-  },
-  {
-    "name": "烟花易冷",
-    "imgUrl": [
-      "/guitar-images/931ebdd3-45c6-43bc-809b-25aa9377c38b.webp",
-      "/guitar-images/9ad3f3fb-215d-45dc-9ed4-114895ba9f4c.webp",
-      "/guitar-images/a2a384c3-e837-4a0a-b899-cbfde97d99bb.webp"
-    ],
-    "createdAt": "2026-07-02T03:48:24.243Z"
-  },
-  {
+    "favorite": false,
     "name": "夏夜晚风",
-    "imgUrl": []
-  },
-  {
-    "name": "后会无期",
     "imgUrl": [
-      "/guitar-images/97f927ae-3f40-498f-9cad-07c4cda5deb0.png",
-      "/guitar-images/287c881f-640b-4a0e-bda2-3a8547c5220b.png"
+      "/guitar-images/3383d6b5-5308-4654-9803-760a5839b38f.png",
+      "/guitar-images/406804e7-de6e-480c-8809-eb4a54d50109.png"
     ],
-    "createdAt": "2026-07-02T02:41:50.125Z"
+    "createdAt": "2026-07-04T05:34:57.377Z"
   },
   {
-    "name": "普通朋友",
-    "imgUrl": []
-  },
-  {
-    "name": "就是爱你",
+    "favorite": false,
+    "name": "阿拉斯加海湾",
     "imgUrl": [
-      "/guitar-images/8e949c93-8fcb-40ac-962b-95227158eb04.webp",
-      "/guitar-images/351dda3d-9071-4057-a4da-3e606a093a0c.webp",
-      "/guitar-images/871e5403-8a55-4587-8a9b-52e32c4debee.webp"
+      "/guitar-images/aef06648-ec58-437c-8195-6bb97fa52ba1.png",
+      "/guitar-images/606f4b72-6b73-451b-b749-253c7be9810a.png"
     ],
-    "createdAt": "2026-07-02T03:15:41.893Z"
+    "createdAt": "2026-07-03T03:35:45.559Z"
   },
   {
-    "name": "最后一页",
-    "imgUrl": []
-  },
-  {
-    "name": "匆匆那年",
-    "imgUrl": []
-  },
-  {
-    "name": "像风一样",
-    "imgUrl": [
-      "/guitar-images/48f1e6b0-bd4b-4926-8433-74f448ea24fc.webp",
-      "/guitar-images/2f7f3c51-b0f4-4797-ab6b-0a697d48aaa9.webp",
-      "/guitar-images/2158451c-1c3b-4951-beb0-f38a77c923a4.webp"
-    ],
-    "createdAt": "2026-07-02T02:41:35.690Z"
-  },
-  {
-    "name": "情非得已",
-    "imgUrl": [
-      "/guitar-images/87bef29b-9834-4f2d-a86d-2e402067cacd.jpg",
-      "/guitar-images/7b576714-bd2f-4075-8421-5949e5b57293.jpg"
-    ],
-    "createdAt": "2026-07-02T03:44:21.465Z"
-  },
-  {
-    "name": "天外来物",
-    "imgUrl": [
-      "/guitar-images/58a3baf8-92f9-48db-9d76-9abe36936a2f.webp",
-      "/guitar-images/e50c0adf-76ba-48ab-a03a-bdc8c9b5e8f3.webp",
-      "/guitar-images/20bd74a4-0b5b-4d22-8515-cb0ea7059ccb.webp"
-    ],
-    "createdAt": "2026-07-02T02:44:41.418Z"
-  },
-  {
-    "name": "因为爱情",
-    "imgUrl": []
-  },
-  {
-    "name": "爱不单行",
-    "imgUrl": [
-      "/guitar-images/1c1e897f-dbde-4d08-b386-8f12c93702e1.png",
-      "/guitar-images/23898134-375a-4f4f-9d1e-24cc6457407d.png"
-    ],
-    "createdAt": "2026-07-02T02:40:29.815Z"
-  },
-  {
-    "name": "我怀念的",
-    "imgUrl": [
-      "/guitar-images/1c4944cc-a9e6-40cc-8585-499ca66f0b35.png",
-      "/guitar-images/716aebd4-28de-4ddc-93f1-7893a3b9d12a.png"
-    ],
-    "createdAt": "2026-07-02T02:39:29.860Z"
-  },
-  {
-    "name": "写给黄淮",
-    "imgUrl": [
-      "/guitar-images/467c866c-b354-48b0-b875-998f0a0c3dd7.webp",
-      "/guitar-images/06a8e146-1191-4b6e-ba98-f7bcff0b556c.webp",
-      "/guitar-images/32965565-a9e8-483c-8d16-cf307c29c0dc.webp",
-      "/guitar-images/1bb1fb1f-6c73-49af-ae28-50393f5be197.webp"
-    ],
-    "createdAt": "2026-07-02T03:01:37.932Z"
-  },
-  {
-    "name": "那些花儿",
-    "imgUrl": [
-      "/guitar-images/48afdc8d-76ac-48be-a118-6022627113fb.webp",
-      "/guitar-images/c2a7e12d-66b7-4182-8f3b-1532b8c79c4f.webp",
-      "/guitar-images/97258283-1367-4525-ba14-cc770a7d4b22.webp"
-    ],
-    "createdAt": "2026-07-02T02:40:54.486Z"
-  },
-  {
-    "name": "少年锦时",
-    "imgUrl": []
-  },
-  {
-    "name": "斑马斑马",
-    "imgUrl": [
-      "/guitar-images/b34f05c0-9a42-4a56-96df-c42aa6cef220.png",
-      "/guitar-images/539ff49e-f715-4d4d-9e5f-09781d73f84f.png",
-      "/guitar-images/00c92be4-636a-4148-a6bd-befdad829428.png"
-    ],
-    "createdAt": "2026-07-02T03:44:03.369Z"
-  },
-  {
-    "name": "海盗船长",
-    "imgUrl": [
-      "/guitar-images/9870721f-24de-4b4e-a6e7-672bb592f861.webp",
-      "/guitar-images/ad8c7b74-8fbe-43f5-835b-3e79a1117845.webp",
-      "/guitar-images/5e050fa7-8578-4609-89e4-184bb1145802.webp"
-    ],
-    "createdAt": "2026-07-02T03:43:49.154Z"
-  },
-  {
-    "name": "春风十里",
-    "imgUrl": []
-  },
-  {
+    "favorite": false,
     "name": "平凡之路",
     "imgUrl": [
       "/guitar-images/991b93e6-0b76-48ae-92db-5ea2a7ac87cf.webp",
@@ -571,86 +29,16 @@
     "createdAt": "2026-07-02T05:54:27.769Z"
   },
   {
-    "name": "爱你没差",
+    "favorite": true,
+    "name": "米店",
     "imgUrl": [
-      "/guitar-images/54bd1239-185a-4704-a42e-51ca1fda072f.jpg",
-      "/guitar-images/ae5b028f-da0b-47ec-9005-054fabc0b4ea.jpg",
-      "/guitar-images/de8ef43d-f0b1-4e95-bba8-5f03304f8c42.jpg"
+      "/guitar-images/895f9d77-c4f8-43a6-95ef-029cf23333c3.png",
+      "/guitar-images/c1f1d41f-58a8-4499-b081-2d3fe490544b.png"
     ],
-    "createdAt": "2026-07-02T03:40:04.531Z"
+    "createdAt": "2026-07-02T05:54:34.593Z"
   },
   {
-    "name": "需要人陪",
-    "imgUrl": []
-  },
-  {
-    "name": "好久不见",
-    "imgUrl": [
-      "/guitar-images/f93c698f-b947-4920-8dd8-b2f7abe87ea7.jpg",
-      "/guitar-images/af839023-d5b9-4225-8fc7-834494dcca18.jpg"
-    ],
-    "createdAt": "2026-07-02T03:02:00.809Z"
-  },
-  {
-    "name": "关于我爱你",
-    "imgUrl": []
-  },
-  {
-    "name": "后来的我们",
-    "imgUrl": [
-      "/guitar-images/4d4b711b-28eb-4856-8748-27145f2ac09b.webp",
-      "/guitar-images/be743589-5a66-4f40-a461-847325f3683d.webp",
-      "/guitar-images/372b3005-865b-4644-94dc-a83bfc454114.webp"
-    ],
-    "createdAt": "2026-07-02T02:45:18.360Z"
-  },
-  {
-    "name": "爱的回归线",
-    "imgUrl": [
-      "/guitar-images/ddf68cfc-5806-474c-9739-65f5a7b982b5.png",
-      "/guitar-images/9fd3492a-c4e5-4109-8994-14ae4fc63eda.png",
-      "/guitar-images/f530873e-d805-4ca0-a808-c3219ea565cd.png"
-    ],
-    "createdAt": "2026-07-02T02:41:42.576Z"
-  },
-  {
-    "name": "至少还有你",
-    "imgUrl": [
-      "/guitar-images/47d5f03d-4711-43f6-8b2b-e220c7c038ea.webp",
-      "/guitar-images/daa21dd9-8d90-4e20-87b4-aee1d91cfa41.webp",
-      "/guitar-images/536cadb5-b016-4ff6-bdc8-07453269e445.webp"
-    ],
-    "createdAt": "2026-07-02T02:41:46.911Z"
-  },
-  {
-    "name": "爱我还是他",
-    "imgUrl": []
-  },
-  {
-    "name": "易燃易爆炸",
-    "imgUrl": []
-  },
-  {
-    "name": "你给我听好",
-    "imgUrl": []
-  },
-  {
-    "name": "奇妙能力歌",
-    "imgUrl": []
-  },
-  {
-    "name": "全世界失眠",
-    "imgUrl": []
-  },
-  {
-    "name": "你把我灌醉",
-    "imgUrl": []
-  },
-  {
-    "name": "可惜没如果",
-    "imgUrl": []
-  },
-  {
+    "favorite": true,
     "name": "和你在一起",
     "imgUrl": [
       "/guitar-images/0a0db9e2-43d4-468e-b226-52f8b0349f58.jpg",
@@ -661,58 +49,112 @@
     "createdAt": "2026-07-02T05:54:02.534Z"
   },
   {
-    "name": "背对背拥抱",
-    "imgUrl": []
-  },
-  {
-    "name": "我是一只鱼",
+    "favorite": false,
+    "name": "夜车",
     "imgUrl": [
-      "/guitar-images/54c3d910-c3b9-46f3-b39f-0575118bec1f.png",
-      "/guitar-images/52691fe9-1cbe-42a3-82fb-d4bfa6ed319d.png"
+      "/guitar-images/04dffd05-2416-4493-aa5c-a07fce20d73d.png",
+      "/guitar-images/77d7a63e-7118-450b-ac0d-09f9da4b46ba.png",
+      "/guitar-images/f5fcd625-40cd-4001-b12b-bda3603a7986.png"
     ],
-    "createdAt": "2026-07-02T03:44:06.807Z"
+    "createdAt": "2026-07-02T03:50:08.598Z"
   },
   {
-    "name": "多余的解释",
+    "favorite": false,
+    "name": "带我走",
     "imgUrl": [
-      "/guitar-images/eb5afc91-329a-45a9-9433-68b2b7d99a9b.png",
-      "/guitar-images/68d02c2d-7037-4537-add1-90815c2f7d85.png"
+      "/guitar-images/9ffacfef-0edc-4eda-93fe-b3d9aefb9d21.png",
+      "/guitar-images/77ba4769-ce12-44c7-a0ed-41296cd6bff0.png",
+      "/guitar-images/62398e75-a0b2-4723-8e50-46e8f244ba69.png"
     ],
-    "createdAt": "2026-07-02T03:44:14.534Z"
+    "createdAt": "2026-07-02T03:49:28.206Z"
   },
   {
-    "name": "旅行的意义",
-    "imgUrl": []
-  },
-  {
-    "name": "反方向的钟",
-    "imgUrl": []
-  },
-  {
-    "name": "我们的时光",
-    "imgUrl": []
-  },
-  {
-    "name": "红色高跟鞋",
+    "favorite": false,
+    "name": "偏爱",
     "imgUrl": [
-      "/guitar-images/10bd04d3-f6e2-48ba-895d-8447e63414ed.jpg",
-      "/guitar-images/11c88af5-b9a0-4b13-9cc4-115511379c67.jpg"
+      "/guitar-images/30716e12-2952-4e5d-9540-07f55f8b66dd.webp",
+      "/guitar-images/a2e3e5a4-d007-4d5d-86d4-6a6f916fcf32.webp"
     ],
-    "createdAt": "2026-07-02T03:37:57.175Z"
+    "createdAt": "2026-07-02T03:49:21.227Z"
   },
   {
-    "name": "最长的电影",
-    "imgUrl": []
+    "favorite": false,
+    "name": "爱我别走",
+    "imgUrl": [
+      "/guitar-images/534060be-c4ad-41b2-85c0-306cb472d947.webp",
+      "/guitar-images/28d782b6-2554-4b9e-be18-65028d367076.webp"
+    ],
+    "createdAt": "2026-07-02T03:48:57.833Z"
   },
   {
-    "name": "慢慢喜欢你",
-    "imgUrl": []
+    "favorite": false,
+    "name": "忽然之间",
+    "imgUrl": [
+      "/guitar-images/63c7dccf-2d48-40ea-b29c-a2b883891b25.webp"
+    ],
+    "createdAt": "2026-07-02T03:48:44.236Z"
   },
   {
-    "name": "手写的从前",
-    "imgUrl": []
+    "favorite": false,
+    "name": "烟花易冷",
+    "imgUrl": [
+      "/guitar-images/931ebdd3-45c6-43bc-809b-25aa9377c38b.webp",
+      "/guitar-images/9ad3f3fb-215d-45dc-9ed4-114895ba9f4c.webp",
+      "/guitar-images/a2a384c3-e837-4a0a-b899-cbfde97d99bb.webp"
+    ],
+    "createdAt": "2026-07-02T03:48:24.243Z"
   },
   {
+    "favorite": false,
+    "name": "花海",
+    "imgUrl": [
+      "/guitar-images/5b8248f4-e746-4ed1-8099-ade3b9918276.png",
+      "/guitar-images/e2e0750e-5e95-4589-a4f4-2ac9e49f4c9d.png",
+      "/guitar-images/09fcc18b-8a60-4f01-9a70-a1b738a6ef0f.png"
+    ],
+    "createdAt": "2026-07-02T03:48:13.939Z"
+  },
+  {
+    "favorite": false,
+    "name": "太聪明",
+    "imgUrl": [
+      "/guitar-images/dc5ed246-7ed4-4dbb-8c34-346322c49113.webp",
+      "/guitar-images/16fcb923-848f-4d85-beed-4d5fbc75da69.webp"
+    ],
+    "createdAt": "2026-07-02T03:48:08.427Z"
+  },
+  {
+    "favorite": false,
+    "name": "董小姐",
+    "imgUrl": [
+      "/guitar-images/794fd070-2b0b-471c-bd66-cd394fbeb7bf.png",
+      "/guitar-images/14ec1772-61ca-467e-a7ec-55043f3b9093.png",
+      "/guitar-images/b366eae2-0221-48e4-a0a0-230647addc5b.png"
+    ],
+    "createdAt": "2026-07-02T03:47:55.167Z"
+  },
+  {
+    "favorite": false,
+    "name": "走马",
+    "imgUrl": [
+      "/guitar-images/7b86335d-8911-4c3a-834b-b4083286a2fd.webp",
+      "/guitar-images/a046714f-7a45-4c29-96a8-e38ab2ac4b3b.webp",
+      "/guitar-images/43bdd176-7089-4884-b9a2-c7ad4ec78983.webp"
+    ],
+    "createdAt": "2026-07-02T03:47:50.411Z"
+  },
+  {
+    "favorite": false,
+    "name": "小幸运",
+    "imgUrl": [
+      "/guitar-images/5632da2c-9d79-4048-a099-16db5ce3d512.webp",
+      "/guitar-images/60c62487-7f60-439d-803a-5bca12a8ecc6.webp",
+      "/guitar-images/0749dd4a-8893-43de-b49c-f2b15d02734a.webp"
+    ],
+    "createdAt": "2026-07-02T03:47:35.969Z"
+  },
+  {
+    "favorite": true,
     "name": "爱人穿过你",
     "imgUrl": [
       "/guitar-images/29ff4da4-599e-4814-9e2a-0021277586f9.png",
@@ -722,28 +164,84 @@
     "createdAt": "2026-07-02T03:46:13.817Z"
   },
   {
-    "name": "阿拉斯加海湾",
+    "favorite": false,
+    "name": "狂恋你",
     "imgUrl": [
-      "https://img.jita5.cc//20210419/alasijiahaiwan1.png",
-      "https://img.jita5.cc//20210419/alasijiahaiwan2.png"
+      "/guitar-images/97216806-fa0b-4972-afdb-a208304527c1.jpg",
+      "/guitar-images/0509764c-b6f3-435c-ac51-f97d961122eb.jpg",
+      "/guitar-images/fc8cf8fb-b4d9-4a57-9b85-b61b4226c27b.jpg",
+      "/guitar-images/24e6638b-50c3-46e6-aff4-d374bf158d1c.jpg"
     ],
-    "createdAt": "2026-07-02T02:41:04.771Z"
+    "createdAt": "2026-07-02T03:44:28.628Z"
   },
   {
-    "name": "思念是一种病",
+    "favorite": false,
+    "name": "情非得已",
     "imgUrl": [
-      "/guitar-images/32268ff7-dcbf-4a5d-99ca-04e010feefa9.png",
-      "/guitar-images/a0cc527f-8e3a-4f63-9550-4819dccff413.png",
-      "/guitar-images/c80579c6-bcc3-4d20-b859-68eff2ad5603.png",
-      "/guitar-images/7f1a8994-daac-4691-ad0f-6ce8f746e6ad.png"
+      "/guitar-images/87bef29b-9834-4f2d-a86d-2e402067cacd.jpg",
+      "/guitar-images/7b576714-bd2f-4075-8421-5949e5b57293.jpg"
     ],
-    "createdAt": "2026-07-02T03:01:53.532Z"
+    "createdAt": "2026-07-02T03:44:21.465Z"
   },
   {
-    "name": "不能说的秘密",
-    "imgUrl": []
+    "favorite": false,
+    "name": "多余的解释",
+    "imgUrl": [
+      "/guitar-images/eb5afc91-329a-45a9-9433-68b2b7d99a9b.png",
+      "/guitar-images/68d02c2d-7037-4537-add1-90815c2f7d85.png"
+    ],
+    "createdAt": "2026-07-02T03:44:14.534Z"
   },
   {
+    "favorite": false,
+    "name": "我是一只鱼",
+    "imgUrl": [
+      "/guitar-images/54c3d910-c3b9-46f3-b39f-0575118bec1f.png",
+      "/guitar-images/52691fe9-1cbe-42a3-82fb-d4bfa6ed319d.png"
+    ],
+    "createdAt": "2026-07-02T03:44:06.807Z"
+  },
+  {
+    "favorite": false,
+    "name": "斑马斑马",
+    "imgUrl": [
+      "/guitar-images/b34f05c0-9a42-4a56-96df-c42aa6cef220.png",
+      "/guitar-images/539ff49e-f715-4d4d-9e5f-09781d73f84f.png",
+      "/guitar-images/00c92be4-636a-4148-a6bd-befdad829428.png"
+    ],
+    "createdAt": "2026-07-02T03:44:03.369Z"
+  },
+  {
+    "favorite": false,
+    "name": "醒着醉",
+    "imgUrl": [
+      "/guitar-images/769e2886-da01-49b9-8368-34162042a6b6.jpg",
+      "/guitar-images/60d71816-e9bf-432f-8bca-cb8edd00ea8a.jpg"
+    ],
+    "createdAt": "2026-07-02T03:43:59.532Z"
+  },
+  {
+    "favorite": false,
+    "name": "年少有为",
+    "imgUrl": [
+      "/guitar-images/8960c027-be84-4ac9-8583-251feea3691a.webp",
+      "/guitar-images/3e0dd3cd-4108-4fe2-828a-9ba1474fcd47.webp",
+      "/guitar-images/c564910d-53c6-4f27-a0e2-dfb457415602.webp"
+    ],
+    "createdAt": "2026-07-02T03:43:54.398Z"
+  },
+  {
+    "favorite": false,
+    "name": "海盗船长",
+    "imgUrl": [
+      "/guitar-images/9870721f-24de-4b4e-a6e7-672bb592f861.webp",
+      "/guitar-images/ad8c7b74-8fbe-43f5-835b-3e79a1117845.webp",
+      "/guitar-images/5e050fa7-8578-4609-89e4-184bb1145802.webp"
+    ],
+    "createdAt": "2026-07-02T03:43:49.154Z"
+  },
+  {
+    "favorite": false,
     "name": "蒲公英的约定",
     "imgUrl": [
       "/guitar-images/cbd8172e-8ffd-4cf2-ae2d-038507923d41.jpg",
@@ -753,35 +251,37 @@
     "createdAt": "2026-07-02T03:41:44.547Z"
   },
   {
-    "name": "遥不可及的你",
-    "imgUrl": []
-  },
-  {
-    "name": "平淡日子里的刺",
-    "imgUrl": []
-  },
-  {
-    "name": "关于郑州的记忆",
-    "imgUrl": []
-  },
-  {
-    "name": "你就不要想起我",
-    "imgUrl": []
-  },
-  {
-    "name": "多远都要在一起",
+    "favorite": false,
+    "name": "鸽子-徐秉龙",
     "imgUrl": [
-      "/guitar-images/5ad091c3-0048-4319-9212-c6c61a950324.png",
-      "/guitar-images/b24683b8-0fae-4329-a475-b073496c1523.png",
-      "/guitar-images/c6241dd2-7e5c-4509-bda2-7a3b8576a18f.png",
-      "/guitar-images/b58550fd-7f20-4ecc-9a43-fb9b166a7f90.png"
-    ]
+      "/guitar-images/a40864c4-4925-4f17-98cb-17687d84cb75.webp",
+      "/guitar-images/9fc05533-52fc-4d49-b412-7c139745bd57.webp",
+      "/guitar-images/8939c801-e8a3-47ac-bf72-09aa6cf29a5e.webp"
+    ],
+    "createdAt": "2026-07-02T03:40:53.773Z"
   },
   {
-    "name": "杀死那个石家庄人",
-    "imgUrl": []
+    "favorite": false,
+    "name": "鸽子",
+    "imgUrl": [
+      "/guitar-images/189696c0-de9a-4778-82e5-3303c5364348.webp",
+      "/guitar-images/a3250758-a160-42e9-8dc6-db66e3454fa4.webp",
+      "/guitar-images/3e7f6fbd-3bde-4cf7-8a2b-21efb32ca6dc.webp"
+    ],
+    "createdAt": "2026-07-02T03:40:18.180Z"
   },
   {
+    "favorite": false,
+    "name": "爱你没差",
+    "imgUrl": [
+      "/guitar-images/54bd1239-185a-4704-a42e-51ca1fda072f.jpg",
+      "/guitar-images/ae5b028f-da0b-47ec-9005-054fabc0b4ea.jpg",
+      "/guitar-images/de8ef43d-f0b1-4e95-bba8-5f03304f8c42.jpg"
+    ],
+    "createdAt": "2026-07-02T03:40:04.531Z"
+  },
+  {
+    "favorite": false,
     "name": "这是我一生中最勇敢的瞬间",
     "imgUrl": [
       "/guitar-images/3264339a-e5f6-469c-9fb4-a32d66142ef8.png",
@@ -792,14 +292,383 @@
     "createdAt": "2026-07-02T03:39:47.380Z"
   },
   {
-    "name": "总有一天你会出现在我身边",
+    "favorite": false,
+    "name": "红色高跟鞋",
     "imgUrl": [
-      "/guitar-images/82feac3c-ee3f-4c03-acf6-f25f6a68e019.png",
-      "/guitar-images/45b30417-ff7b-400f-b2ba-397fb1ba2d45.png",
-      "/guitar-images/ec38e46b-6ca3-45ec-b48b-1e4eb15508b9.png"
-    ]
+      "/guitar-images/10bd04d3-f6e2-48ba-895d-8447e63414ed.jpg",
+      "/guitar-images/11c88af5-b9a0-4b13-9cc4-115511379c67.jpg"
+    ],
+    "createdAt": "2026-07-02T03:37:57.175Z"
   },
   {
+    "favorite": false,
+    "name": "彩虹",
+    "imgUrl": [
+      "/guitar-images/a86c12bd-69c0-4844-960d-ea7ac1cccc16.jpg",
+      "/guitar-images/9161142a-8861-44b3-8f3b-ada0984e976f.jpg",
+      "/guitar-images/bffbdf22-e564-4a03-8d22-0c877691350e.jpg"
+    ],
+    "createdAt": "2026-07-02T03:21:03.267Z"
+  },
+  {
+    "favorite": false,
+    "name": "遇见",
+    "imgUrl": [
+      "/guitar-images/f9cdd5cd-bb63-41a0-8688-cd19e40de1aa.webp",
+      "/guitar-images/eca0810e-a851-4f16-9027-95b87a708a52.webp",
+      "/guitar-images/2c488da5-f2c1-4bdd-b095-d084a7be814d.webp"
+    ],
+    "createdAt": "2026-07-02T03:20:56.170Z"
+  },
+  {
+    "favorite": false,
+    "name": "就是爱你",
+    "imgUrl": [
+      "/guitar-images/8e949c93-8fcb-40ac-962b-95227158eb04.webp",
+      "/guitar-images/351dda3d-9071-4057-a4da-3e606a093a0c.webp",
+      "/guitar-images/871e5403-8a55-4587-8a9b-52e32c4debee.webp"
+    ],
+    "createdAt": "2026-07-02T03:15:41.893Z"
+  },
+  {
+    "favorite": false,
+    "name": "唯一",
+    "imgUrl": [
+      "/guitar-images/e75e3093-692d-4f50-b9f4-bc8a1c4d962a.jpg",
+      "/guitar-images/1d388f38-e38b-454f-a5f9-72f69e4cdc66.jpg"
+    ],
+    "createdAt": "2026-07-02T03:15:21.560Z"
+  },
+  {
+    "favorite": false,
+    "name": "白羊",
+    "imgUrl": [
+      "/guitar-images/9ba23f36-9db7-42f2-81be-2b456a080ccf.webp"
+    ],
+    "createdAt": "2026-07-02T03:14:50.821Z"
+  },
+  {
+    "favorite": false,
+    "name": "七月上",
+    "imgUrl": [
+      "/guitar-images/8c20b005-bf09-472b-ae14-2ca94a4b4b2a.webp",
+      "/guitar-images/c3a5e1da-c60d-4329-80d7-863afc697098.webp"
+    ],
+    "createdAt": "2026-07-02T03:06:25.449Z"
+  },
+  {
+    "favorite": false,
+    "name": "水星记",
+    "imgUrl": [
+      "/guitar-images/da7af390-6cc9-414a-b570-2463819468d7.png",
+      "/guitar-images/ae2ba888-baa8-4fc1-8e85-d64538fec361.png",
+      "/guitar-images/5e5ab96f-5219-4362-bd10-6f48f49753a8.png",
+      "/guitar-images/00204937-4161-4413-9805-bb58a42b77a3.png"
+    ],
+    "createdAt": "2026-07-02T03:05:56.711Z"
+  },
+  {
+    "favorite": false,
+    "name": "说谎",
+    "imgUrl": [
+      "/guitar-images/402cbbeb-45a5-4d1e-aec1-ef674f4ab82f.png",
+      "/guitar-images/c5b18c22-eaf9-46e3-99c6-35c9be4c3e19.png",
+      "/guitar-images/a89034d0-e995-4a1a-bd3d-bd124be8a11d.png"
+    ],
+    "createdAt": "2026-07-02T03:05:48.827Z"
+  },
+  {
+    "favorite": false,
+    "name": "心墙",
+    "imgUrl": [
+      "/guitar-images/aa855a3f-4a07-4ba8-baea-c76fe8c2c388.jpg"
+    ],
+    "createdAt": "2026-07-02T03:02:13.542Z"
+  },
+  {
+    "favorite": false,
+    "name": "好久不见",
+    "imgUrl": [
+      "/guitar-images/f93c698f-b947-4920-8dd8-b2f7abe87ea7.jpg",
+      "/guitar-images/af839023-d5b9-4225-8fc7-834494dcca18.jpg"
+    ],
+    "createdAt": "2026-07-02T03:02:00.809Z"
+  },
+  {
+    "favorite": false,
+    "name": "思念是一种病",
+    "imgUrl": [
+      "/guitar-images/32268ff7-dcbf-4a5d-99ca-04e010feefa9.png",
+      "/guitar-images/a0cc527f-8e3a-4f63-9550-4819dccff413.png",
+      "/guitar-images/c80579c6-bcc3-4d20-b859-68eff2ad5603.png",
+      "/guitar-images/7f1a8994-daac-4691-ad0f-6ce8f746e6ad.png"
+    ],
+    "createdAt": "2026-07-02T03:01:53.532Z"
+  },
+  {
+    "favorite": false,
+    "name": "写给黄淮",
+    "imgUrl": [
+      "/guitar-images/467c866c-b354-48b0-b875-998f0a0c3dd7.webp",
+      "/guitar-images/06a8e146-1191-4b6e-ba98-f7bcff0b556c.webp",
+      "/guitar-images/32965565-a9e8-483c-8d16-cf307c29c0dc.webp",
+      "/guitar-images/1bb1fb1f-6c73-49af-ae28-50393f5be197.webp"
+    ],
+    "createdAt": "2026-07-02T03:01:37.932Z"
+  },
+  {
+    "favorite": false,
+    "name": "温柔",
+    "imgUrl": [
+      "/guitar-images/2413885e-39b9-4ee4-8aa4-4ed0fd80a135.webp",
+      "/guitar-images/4cb23579-306a-4c64-80b7-12394c7f1e66.webp",
+      "/guitar-images/6710d438-25ff-4eab-a169-705aa1b2fcf5.webp"
+    ],
+    "createdAt": "2026-07-02T03:01:29.387Z"
+  },
+  {
+    "favorite": false,
+    "name": "我记得",
+    "imgUrl": [
+      "/guitar-images/87c47432-0a4c-4949-977b-83c8bc099b65.png",
+      "/guitar-images/fd86d8d7-6a5c-415a-beed-dfd00b3e3d0b.png",
+      "/guitar-images/8252a56f-005e-481c-9485-01c6cba6b709.png",
+      "/guitar-images/a4c81ba9-d1b4-4711-81ac-00497ef2e6ff.png"
+    ],
+    "createdAt": "2026-07-02T03:00:37.437Z"
+  },
+  {
+    "favorite": false,
+    "name": "故梦",
+    "imgUrl": [
+      "/guitar-images/3b1caa0b-9b23-413b-bdfd-9b4b90eb163b.png",
+      "/guitar-images/985d8085-682a-4b39-9954-8e557cde2b55.png",
+      "/guitar-images/e3dcafb4-7673-4fa7-b5ec-8333b97c074c.png",
+      "/guitar-images/4d0e066a-8a86-49da-8407-02de1baad7de.png"
+    ],
+    "createdAt": "2026-07-02T02:55:21.405Z"
+  },
+  {
+    "favorite": false,
+    "name": "雨爱",
+    "imgUrl": [
+      "/guitar-images/9a8eeef1-974a-4466-b0a9-94ffcec0a848.png",
+      "/guitar-images/a3415192-ce5c-4fb8-acec-91a3b55d287a.png"
+    ],
+    "createdAt": "2026-07-02T02:45:38.725Z"
+  },
+  {
+    "favorite": false,
+    "name": "后来的我们",
+    "imgUrl": [
+      "/guitar-images/4d4b711b-28eb-4856-8748-27145f2ac09b.webp",
+      "/guitar-images/be743589-5a66-4f40-a461-847325f3683d.webp",
+      "/guitar-images/372b3005-865b-4644-94dc-a83bfc454114.webp"
+    ],
+    "createdAt": "2026-07-02T02:45:18.360Z"
+  },
+  {
+    "favorite": false,
+    "name": "晴天",
+    "imgUrl": [
+      "/guitar-images/fcd68e49-8aaa-4eff-bbb5-f3c69b1fdd37.webp",
+      "/guitar-images/99ee9280-a0fb-421f-bf44-7facaf3fe9a3.webp",
+      "/guitar-images/c27c6fb4-d85b-4cb2-80f1-66b25918e3d2.webp"
+    ],
+    "createdAt": "2026-07-02T02:44:56.282Z"
+  },
+  {
+    "favorite": false,
+    "name": "天外来物",
+    "imgUrl": [
+      "/guitar-images/58a3baf8-92f9-48db-9d76-9abe36936a2f.webp",
+      "/guitar-images/e50c0adf-76ba-48ab-a03a-bdc8c9b5e8f3.webp",
+      "/guitar-images/20bd74a4-0b5b-4d22-8515-cb0ea7059ccb.webp"
+    ],
+    "createdAt": "2026-07-02T02:44:41.418Z"
+  },
+  {
+    "favorite": false,
+    "name": "星晴",
+    "imgUrl": [
+      "/guitar-images/bd6e0e02-62c0-4142-a00d-b681ae66996a.png",
+      "/guitar-images/7b9fcd21-4f17-4303-b515-634bb0f648b9.png"
+    ],
+    "createdAt": "2026-07-02T02:42:14.694Z"
+  },
+  {
+    "favorite": false,
+    "name": "恶作剧",
+    "imgUrl": [
+      "/guitar-images/9c909606-f9d9-4e17-9ce2-383698a81dba.webp",
+      "/guitar-images/35977770-1c71-4710-94f6-2221b15236e6.webp",
+      "/guitar-images/aff2f80a-3691-4b4a-bcb0-fe7a1e61d8c5.webp"
+    ],
+    "createdAt": "2026-07-02T02:42:06.642Z"
+  },
+  {
+    "favorite": false,
+    "name": "后会无期",
+    "imgUrl": [
+      "/guitar-images/97f927ae-3f40-498f-9cad-07c4cda5deb0.png",
+      "/guitar-images/287c881f-640b-4a0e-bda2-3a8547c5220b.png"
+    ],
+    "createdAt": "2026-07-02T02:41:50.125Z"
+  },
+  {
+    "favorite": false,
+    "name": "至少还有你",
+    "imgUrl": [
+      "/guitar-images/47d5f03d-4711-43f6-8b2b-e220c7c038ea.webp",
+      "/guitar-images/daa21dd9-8d90-4e20-87b4-aee1d91cfa41.webp",
+      "/guitar-images/536cadb5-b016-4ff6-bdc8-07453269e445.webp"
+    ],
+    "createdAt": "2026-07-02T02:41:46.911Z"
+  },
+  {
+    "favorite": false,
+    "name": "爱的回归线",
+    "imgUrl": [
+      "/guitar-images/ddf68cfc-5806-474c-9739-65f5a7b982b5.png",
+      "/guitar-images/9fd3492a-c4e5-4109-8994-14ae4fc63eda.png",
+      "/guitar-images/f530873e-d805-4ca0-a808-c3219ea565cd.png"
+    ],
+    "createdAt": "2026-07-02T02:41:42.576Z"
+  },
+  {
+    "favorite": false,
+    "name": "像风一样",
+    "imgUrl": [
+      "/guitar-images/48f1e6b0-bd4b-4926-8433-74f448ea24fc.webp",
+      "/guitar-images/2f7f3c51-b0f4-4797-ab6b-0a697d48aaa9.webp",
+      "/guitar-images/2158451c-1c3b-4951-beb0-f38a77c923a4.webp"
+    ],
+    "createdAt": "2026-07-02T02:41:35.690Z"
+  },
+  {
+    "favorite": false,
+    "name": "小酒窝",
+    "imgUrl": [
+      "/guitar-images/6c6eb526-f307-4f2f-b4b6-a9ce5fbbdd16.jpg",
+      "/guitar-images/82a30a63-235e-4fdf-b3fb-6532854c77c7.jpg"
+    ],
+    "createdAt": "2026-07-02T02:41:00.250Z"
+  },
+  {
+    "favorite": false,
+    "name": "那些花儿",
+    "imgUrl": [
+      "/guitar-images/48afdc8d-76ac-48be-a118-6022627113fb.webp",
+      "/guitar-images/c2a7e12d-66b7-4182-8f3b-1532b8c79c4f.webp",
+      "/guitar-images/97258283-1367-4525-ba14-cc770a7d4b22.webp"
+    ],
+    "createdAt": "2026-07-02T02:40:54.486Z"
+  },
+  {
+    "favorite": false,
+    "name": "爱不单行",
+    "imgUrl": [
+      "/guitar-images/1c1e897f-dbde-4d08-b386-8f12c93702e1.png",
+      "/guitar-images/23898134-375a-4f4f-9d1e-24cc6457407d.png"
+    ],
+    "createdAt": "2026-07-02T02:40:29.815Z"
+  },
+  {
+    "favorite": false,
+    "name": "我怀念的",
+    "imgUrl": [
+      "/guitar-images/1c4944cc-a9e6-40cc-8585-499ca66f0b35.png",
+      "/guitar-images/716aebd4-28de-4ddc-93f1-7893a3b9d12a.png"
+    ],
+    "createdAt": "2026-07-02T02:39:29.860Z"
+  },
+  {
+    "favorite": false,
+    "name": "安和桥",
+    "imgUrl": [
+      "/guitar-images/608360ab-115f-4bd3-9e77-86d5e101fab8.png",
+      "/guitar-images/bb007618-5e7b-481b-809a-af9dfd3c3761.png"
+    ],
+    "createdAt": "2026-07-02T02:39:09.466Z"
+  },
+  {
+    "favorite": false,
+    "name": "南山南",
+    "imgUrl": [
+      "/guitar-images/f9ffe24d-5e61-4034-ae92-79f20a6564b0.webp",
+      "/guitar-images/fe2da171-5af7-4532-81e2-e648eb88c60a.webp",
+      "/guitar-images/79c9b1bc-97d1-42bc-9cce-63acc886a1e4.webp",
+      "/guitar-images/80c3a25d-8225-4f09-b1d4-f7de2c54eb7c.webp"
+    ],
+    "createdAt": "2026-07-02T02:38:54.202Z"
+  },
+  {
+    "favorite": false,
+    "name": "小宇",
+    "imgUrl": [
+      "/guitar-images/76adf3c8-9bb5-4e81-bea1-3964b94cb0bf.png",
+      "/guitar-images/522a0100-e7c6-42f3-810e-555e3ea23211.png"
+    ],
+    "createdAt": "2026-07-02T02:38:41.501Z"
+  },
+  {
+    "favorite": false,
+    "name": "虚拟",
+    "imgUrl": [
+      "/guitar-images/5641559e-91ae-4892-ac34-abc8042bb273.png",
+      "/guitar-images/bbf2c341-2600-4265-b800-bb83407f028b.png"
+    ],
+    "createdAt": "2026-07-02T02:38:37.415Z"
+  },
+  {
+    "favorite": false,
+    "name": "儿歌",
+    "imgUrl": [
+      "/guitar-images/cca770bf-43aa-4920-a7cc-52fab5110bd3.gif",
+      "/guitar-images/fb7ca8d6-ffca-4885-b17f-b3517c3ce631.gif"
+    ],
+    "createdAt": "2026-07-02T02:38:30.020Z"
+  },
+  {
+    "favorite": false,
+    "name": "失眠飞行",
+    "imgUrl": [
+      "/guitar-images/6a888bff-4b8a-4df8-a9ce-19c5345f4de9.jpg",
+      "/guitar-images/93b7b357-56c7-4d04-9b26-4dc41d6cb56d.jpg",
+      "/guitar-images/0dfb6fd2-b45c-49e2-bd5e-9c7a3dc50e41.jpg"
+    ],
+    "createdAt": "2026-07-02T02:11:59.156Z"
+  },
+  {
+    "favorite": false,
+    "name": "低空飞行",
+    "imgUrl": [
+      "/guitar-images/840e3c91-d8aa-48fc-b89d-1020a7542b69.jpg",
+      "/guitar-images/906e5158-d497-472c-86e4-78305ee2d4c6.jpg",
+      "/guitar-images/6c59696b-fdc8-4f50-b8aa-bdc507187df7.jpg"
+    ],
+    "createdAt": "2026-07-01T16:17:45.922Z"
+  },
+  {
+    "favorite": true,
+    "name": "私奔",
+    "imgUrl": [
+      "/guitar-images/79b441ab-5f14-4fd7-a34b-9bbee42a5340.jpg",
+      "/guitar-images/70e8303c-d732-40ae-a7e1-41d4c0d3a2f3.jpg"
+    ],
+    "createdAt": "2026-07-01T16:07:46.534Z"
+  },
+  {
+    "favorite": false,
+    "name": "泡沫",
+    "imgUrl": [
+      "/guitar-images/3cf05c56-c32e-447b-94fe-1664fb179a9e.png",
+      "/guitar-images/5ca21c5b-3a57-4990-a682-cc5cc0478a5a.png"
+    ],
+    "createdAt": "2026-07-01T16:01:54.678Z"
+  },
+  {
+    "favorite": false,
     "name": "一半一半",
     "imgUrl": [
       "/guitar-images/c82c0b54-b1e7-4522-9115-0e98fb58860b.png",
@@ -810,30 +679,284 @@
     "createdAt": "2026-07-01T15:50:29.848Z"
   },
   {
-    "name": "低空飞行",
+    "favorite": false,
+    "name": "傲寒",
     "imgUrl": [
-      "/guitar-images/840e3c91-d8aa-48fc-b89d-1020a7542b69.jpg",
-      "/guitar-images/906e5158-d497-472c-86e4-78305ee2d4c6.jpg",
-      "/guitar-images/6c59696b-fdc8-4f50-b8aa-bdc507187df7.jpg"
+      "/guitar-images/7135c861-5bbd-4c82-9a77-f785a3c6e10f.jpg",
+      "/guitar-images/fdf4eeb4-d86e-4b66-ad33-11cc350c4374.jpg",
+      "/guitar-images/130ae8ab-d83d-4585-b803-b67b1a5e1a96.jpg"
     ],
-    "createdAt": "2026-07-01T16:17:45.922Z"
+    "createdAt": "2026-07-01T15:42:49.262Z"
   },
   {
-    "name": "失眠飞行",
+    "favorite": false,
+    "name": "达尔文",
     "imgUrl": [
-      "/guitar-images/6a888bff-4b8a-4df8-a9ce-19c5345f4de9.jpg",
-      "/guitar-images/93b7b357-56c7-4d04-9b26-4dc41d6cb56d.jpg",
-      "/guitar-images/0dfb6fd2-b45c-49e2-bd5e-9c7a3dc50e41.jpg"
+      "/guitar-images/8b647f54-a975-42cf-a8a9-5bf90ac1cfb0.png",
+      "/guitar-images/6dceca7c-e390-45fc-bb41-a3c3226422ee.png"
     ],
-    "createdAt": "2026-07-02T02:11:59.156Z"
+    "createdAt": "2026-07-01T15:40:00.162Z"
   },
   {
-    "name": "鸽子-徐秉龙",
+    "favorite": false,
+    "name": "老街",
     "imgUrl": [
-      "/guitar-images/a40864c4-4925-4f17-98cb-17687d84cb75.webp",
-      "/guitar-images/9fc05533-52fc-4d49-b412-7c139745bd57.webp",
-      "/guitar-images/8939c801-e8a3-47ac-bf72-09aa6cf29a5e.webp"
+      "/guitar-images/960b73dd-5056-47a5-9e02-a59967bc073f.png",
+      "/guitar-images/0059301a-5ca6-4b53-b67e-000fa5134ba4.png",
+      "/guitar-images/c19faced-9a99-4f75-b6bf-87a5e6445ab3.png"
     ],
-    "createdAt": "2026-07-02T03:40:53.773Z"
+    "createdAt": "2026-07-01T15:22:00.081Z"
+  },
+  {
+    "favorite": false,
+    "name": "宝贝",
+    "imgUrl": [
+      "/guitar-images/7e380b2f-c61d-4e14-815a-04660151bd85.jpg",
+      "/guitar-images/df69ade8-a310-4329-80ea-c9369c79617e.jpg"
+    ],
+    "createdAt": "2026-07-01T15:00:51.141Z"
+  },
+  {
+    "favorite": false,
+    "name": "幻听",
+    "imgUrl": [
+      "/guitar-images/ba0bf68e-8b32-49d8-8b70-057c38f530eb.png",
+      "/guitar-images/bc1314cc-6541-4f79-bd2d-7524c441b7fe.png",
+      "/guitar-images/680bff21-41ec-435b-8807-e955a86cd7ec.png"
+    ],
+    "createdAt": "2026-07-01T15:00:39.972Z"
+  },
+  {
+    "favorite": false,
+    "name": "成都",
+    "imgUrl": [
+      "/guitar-images/6b1257ee-89fc-46d4-8e08-c4e0627c862a.webp",
+      "/guitar-images/e9d2ac7c-a65d-4fd4-8fd3-9af0df80cf0a.webp",
+      "/guitar-images/fdf228bd-22c1-40e2-9430-fc60718db75d.webp"
+    ],
+    "createdAt": "2026-07-01T15:00:26.058Z"
+  },
+  {
+    "favorite": false,
+    "name": "画",
+    "imgUrl": [
+      "/guitar-images/981f3dfa-fdd3-45d4-890b-b041d12a5eec.png",
+      "/guitar-images/287ef5d3-34bd-477f-aa2e-cdb2d37e3642.png",
+      "/guitar-images/47841c71-bd64-4616-a282-573b451f6cb5.png"
+    ],
+    "createdAt": "2026-07-01T14:59:43.198Z"
+  },
+  {
+    "favorite": false,
+    "name": "红尘客栈",
+    "imgUrl": [
+      "/guitar-images/96d2a97b-60e3-49ca-b615-9554197ac306.webp",
+      "/guitar-images/8572e3af-02b3-4a8f-8747-5563dc2fed7e.webp",
+      "/guitar-images/d7c6d363-00cf-49f7-93c0-68a364f3e1c9.webp"
+    ],
+    "createdAt": "2026-07-01T14:58:27.126Z"
+  },
+  {
+    "favorite": false,
+    "name": "玫瑰",
+    "imgUrl": [
+      "/guitar-images/323b698b-ec04-45af-a841-50068f3258ba.png",
+      "/guitar-images/522abe68-b72c-48d6-8cfd-d56ac688ada9.png",
+      "/guitar-images/a225b2ed-1c12-417e-ad25-6f8706a02375.png"
+    ]
+  },
+  {
+    "favorite": false,
+    "name": "形容",
+    "imgUrl": [
+      "/guitar-images/f23bca84-c30e-4a5f-bac2-76ef824dd16b.png",
+      "/guitar-images/78428e6e-e2e3-4430-8267-e40ec1e4c60f.png",
+      "/guitar-images/13cd6a08-4cd4-4782-a51c-3828115e2b6b.png",
+      "/guitar-images/673531e4-cd48-4110-9d64-f9b569bbad83.png"
+    ]
+  },
+  {
+    "favorite": false,
+    "name": "明明就",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "圣诞结",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "莉莉安",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "结婚记",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "普通朋友",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "最后一页",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "匆匆那年",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "因为爱情",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "少年锦时",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "春风十里",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "需要人陪",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "关于我爱你",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "爱我还是他",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "易燃易爆炸",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "你给我听好",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "奇妙能力歌",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "全世界失眠",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "你把我灌醉",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "可惜没如果",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "背对背拥抱",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "旅行的意义",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "反方向的钟",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "我们的时光",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "最长的电影",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "慢慢喜欢你",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "手写的从前",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "不能说的秘密",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "遥不可及的你",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "平淡日子里的刺",
+    "imgUrl": []
+  },
+  {
+    "favorite": true,
+    "name": "关于郑州的记忆",
+    "imgUrl": [
+      "/guitar-images/d6a1236b-7392-451d-95d6-0aad6cf65f67.png",
+      "/guitar-images/3fe62346-d405-49b9-9fd1-9814bb5b88a7.png",
+      "/guitar-images/249bd7b7-bb3b-427e-b1fe-45c1f75e5f93.png"
+    ],
+    "createdAt": "2026-07-04T06:41:00.170Z"
+  },
+  {
+    "favorite": false,
+    "name": "你就不要想起我",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "多远都要在一起",
+    "imgUrl": [
+      "/guitar-images/5ad091c3-0048-4319-9212-c6c61a950324.png",
+      "/guitar-images/b24683b8-0fae-4329-a475-b073496c1523.png",
+      "/guitar-images/c6241dd2-7e5c-4509-bda2-7a3b8576a18f.png",
+      "/guitar-images/b58550fd-7f20-4ecc-9a43-fb9b166a7f90.png"
+    ]
+  },
+  {
+    "favorite": false,
+    "name": "杀死那个石家庄人",
+    "imgUrl": []
+  },
+  {
+    "favorite": false,
+    "name": "总有一天你会出现在我身边",
+    "imgUrl": [
+      "/guitar-images/82feac3c-ee3f-4c03-acf6-f25f6a68e019.png",
+      "/guitar-images/45b30417-ff7b-400f-b2ba-397fb1ba2d45.png",
+      "/guitar-images/ec38e46b-6ca3-45ec-b48b-1e4eb15508b9.png"
+    ]
   }
 ]

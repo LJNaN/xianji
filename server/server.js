@@ -56,7 +56,7 @@ const upload = multer({
 
 function loadSongs() {
   if (fs.existsSync(DATA_FILE)) {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8')).map(s => ({ favorite: false, ...s }));
   }
   return [];
 }
@@ -98,11 +98,11 @@ async function downloadImage(url, index) {
   }
 }
 
-// 从 Bing 搜索第一条结果 URL
-async function searchBingFirstResult(query) {
+// 从 Bing 搜索获取最多 maxResults 个结果 URL
+async function searchBingResults(query, maxResults = 3) {
   const url = `https://cn.bing.com/search?q=${encodeURIComponent(query)}`;
   const resp = await axios.get(url, {
-    timeout: 15000,
+    timeout: 10000,
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml',
@@ -110,11 +110,12 @@ async function searchBingFirstResult(query) {
     }
   });
   const $ = cheerio.load(resp.data);
-  // Bing 搜索结果：.b_algo h2 a 为第一条结果
-  const firstLink = $('#b_results .b_algo h2 a').first();
-  if (!firstLink.length) return null;
-  const href = firstLink.attr('href');
-  return href || null;
+  const links = [];
+  $('#b_results .b_algo h2 a').each((_, el) => {
+    const href = $(el).attr('href');
+    if (href) links.push(href);
+  });
+  return links.slice(0, maxResults);
 }
 
 // 从页面提取图片
@@ -149,7 +150,7 @@ app.post('/guitar-api/songs', (req, res) => {
   if (!name) return res.status(400).json({ error: '歌曲名称不能为空' });
   const songs = loadSongs();
   if (songs.some(s => s.name === name)) return res.status(409).json({ error: '歌曲已存在' });
-  const song = { name, imgUrl: [], createdAt: new Date().toISOString() };
+  const song = { name, imgUrl: [], favorite: false, createdAt: new Date().toISOString() };
   songs.push(song);
   saveSongs(songs);
   res.status(201).json({ message: '歌曲创建成功', song });
@@ -164,6 +165,17 @@ app.delete('/guitar-api/songs/:name', (req, res) => {
   if (songs.length === before) return res.status(404).json({ error: '歌曲未找到' });
   saveSongs(songs);
   res.json({ message: '歌曲删除成功' });
+});
+
+// PUT /guitar-api/songs/:name/favorite — 切换最爱
+app.put('/guitar-api/songs/:name/favorite', (req, res) => {
+  const { name } = req.params;
+  const songs = loadSongs();
+  const target = songs.find(s => s.name === name);
+  if (!target) return res.status(404).json({ error: '歌曲未找到' });
+  target.favorite = !target.favorite;
+  saveSongs(songs);
+  res.json({ message: '更新成功', favorite: target.favorite });
 });
 
 // PUT /guitar-api/songs/:old_name
@@ -203,7 +215,7 @@ app.post('/guitar-api/tabs/:title', async (req, res) => {
   const songs = loadSongs();
   let target = songs.find(s => s.name === title);
   if (!target) {
-    target = { name: title, imgUrl: [] };
+    target = { name: title, favorite: false, imgUrl: [] };
     songs.push(target);
     saveSongs(songs);
   }
@@ -219,23 +231,50 @@ app.post('/guitar-api/tabs/:title', async (req, res) => {
   }
 });
 
-// POST /guitar-api/tabs/:name/auto-fetch — 自动搜索并提取图片
+// POST /guitar-api/tabs/:name/auto-fetch — 自动搜索并提取图片（重试最多3个结果）
 app.post('/guitar-api/tabs/:name/auto-fetch', async (req, res) => {
   const { name } = req.params;
+  const ATTEMPT_TIMEOUT = 5000; // 每个结果 5 秒超时
+  const MAX_ATTEMPTS = 3;
+  const TOTAL_TIMEOUT = 15000; // 总超时 15 秒
+
   try {
-    // 1. 搜索 Bing 获取第一条结果 URL
-    const resultUrl = await searchBingFirstResult(`${name}吉他谱`);
-    if (!resultUrl) {
+    // 1. 搜索 Bing 获取最多 3 个结果 URL
+    const resultUrls = await searchBingResults(`${name}吉他谱`, MAX_ATTEMPTS);
+    if (!resultUrls || resultUrls.length === 0) {
       return res.status(404).json({ error: '未在 Bing 搜索到相关结果' });
     }
 
-    // 2. 从该 URL 提取图片
-    const result = await parseImagesFromUrl(resultUrl);
-    if (result && result.type === 'image' && result.data && result.data.length > 0) {
-      res.json({ source_url: resultUrl, candidate_images: result.data });
-    } else {
-      res.status(404).json({ error: `已从 "${resultUrl}" 找到页面但未提取到图片`, source_url: resultUrl });
+    // 2. 依次尝试每个结果，每个最多等 5 秒
+    const startTime = Date.now();
+    let lastError = '';
+
+    for (let i = 0; i < resultUrls.length; i++) {
+      if (Date.now() - startTime > TOTAL_TIMEOUT) {
+        lastError = '总超时 15 秒';
+        break;
+      }
+
+      try {
+        const result = await Promise.race([
+          parseImagesFromUrl(resultUrls[i]),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('单个结果超时(5s)')), ATTEMPT_TIMEOUT))
+        ]);
+
+        if (result && result.type === 'image' && result.data && result.data.length > 0) {
+          return res.json({ source_url: resultUrls[i], candidate_images: result.data });
+        }
+        lastError = `"${resultUrls[i]}" 未提取到图片`;
+      } catch (e) {
+        lastError = `"${resultUrls[i]}" ${e.message}`;
+        // 继续尝试下一个
+      }
     }
+
+    res.status(404).json({
+      error: `已尝试 ${resultUrls.length} 个搜索结果，均失败: ${lastError}`,
+      attempts: resultUrls.length
+    });
   } catch (e) {
     res.status(500).json({ error: `自动获取失败: ${e.message}` });
   }
@@ -310,7 +349,7 @@ app.post('/guitar-api/tabs/:name/reparse', async (req, res) => {
   const songs = loadSongs();
   let target = songs.find(s => s.name === name);
   if (!target) {
-    target = { name, imgUrl: [] };
+    target = { name, favorite: false, imgUrl: [] };
     songs.push(target);
     saveSongs(songs);
   }

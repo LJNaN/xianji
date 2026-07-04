@@ -1,47 +1,20 @@
 import React, { memo } from 'react';
-import { useSortable } from '@dnd-kit/sortable';
 import { Button } from 'antd';
-import { MinusCircleOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, HeartFilled } from '@ant-design/icons';
 
 const SongItem = memo(({
   song,
+  favorite,
   isEditing,
   onSongClick,
   onDelete,
-  isDragging,
+  onToggleFavorite,
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({
-    id: song.id,
-    data: { song },
-    disabled: !isEditing,
-  });
-
-  const style = {
-    transform: transform ? `translate3d(${Math.round(transform.x)}px, ${Math.round(transform.y)}px, 0)` : undefined,
-    transition: isDragging ? 'none' : transition,
-    cursor: isEditing ? 'grab' : 'pointer',
-    position: 'relative',
-    touchAction: isEditing ? 'none' : 'auto',
-    userSelect: isEditing ? 'none' : 'auto',
-    WebkitUserSelect: isEditing ? 'none' : 'auto',
-  };
-
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-    >
+    <div style={{ position: 'relative' }}>
       <Button
         size="large"
-        onClick={() => !isEditing && onSongClick(song.name)}
+        onClick={() => onSongClick(song.name)}
         style={{
           width: '100%',
           whiteSpace: 'nowrap',
@@ -70,6 +43,19 @@ const SongItem = memo(({
             borderRadius: '50%',
             background: 'white',
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            zIndex: 10,
+          }}
+        />
+      )}
+
+      {favorite && (
+        <HeartFilled
+          style={{
+            position: 'absolute',
+            bottom: 2,
+            left: 2,
+            fontSize: 9,
+            color: '#e8453c',
             zIndex: 10,
           }}
         />
