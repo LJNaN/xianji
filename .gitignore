@@ -2,9 +2,6 @@ node_modules/
 dist/
 .claude/
 
-# 服务器上传的图片
-server/images/
-
 # Docker 备份目录
 server/backups/
 
