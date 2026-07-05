@@ -52,9 +52,9 @@ const SongItem = memo(({
         <HeartFilled
           style={{
             position: 'absolute',
-            bottom: 2,
-            left: 2,
-            fontSize: 9,
+            bottom: 3,
+            left: 3,
+            fontSize: 8,
             color: '#e8453c',
             zIndex: 10,
           }}

@@ -930,7 +930,11 @@
   {
     "favorite": false,
     "name": "慢慢喜欢你",
-    "imgUrl": []
+    "imgUrl": [
+      "/guitar-images/0f62cfe3-237f-4b8f-b97b-2baf498569c1.png",
+      "/guitar-images/6234a1c6-1d63-436e-8eb2-cb00b10b00f9.png"
+    ],
+    "createdAt": "2026-07-05T15:07:09.886Z"
   },
   {
     "favorite": false,
@@ -990,5 +994,15 @@
       "/guitar-images/45b30417-ff7b-400f-b2ba-397fb1ba2d45.png",
       "/guitar-images/ec38e46b-6ca3-45ec-b48b-1e4eb15508b9.png"
     ]
+  },
+  {
+    "favorite": false,
+    "name": "富士山下",
+    "imgUrl": [
+      "/guitar-images/7a80a5e8-7332-4586-9980-bf0861cf1efa.png",
+      "/guitar-images/2d7acfee-ffea-420c-8741-7dca08f81bd8.png",
+      "/guitar-images/b632ac1f-58d9-41cf-8213-d371d0d478b7.png"
+    ],
+    "createdAt": "2026-07-05T14:56:05.435Z"
   }
 ]

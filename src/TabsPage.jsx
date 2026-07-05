@@ -51,6 +51,8 @@ function TabsPage() {
   const [barVisible, setBarVisible] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
   const [heartAnimating, setHeartAnimating] = useState(false);
+  const [editingName, setEditingName] = useState(name);
+  const [renaming, setRenaming] = useState(false);
   const hideTimerRef = useRef(null);
 
   function getColumnsByViewport(w, h) {
@@ -263,6 +265,35 @@ function TabsPage() {
     });
   };
 
+  const handleRename = async () => {
+    const newName = editingName.trim();
+    if (!newName || newName === name) {
+      setSettingsOpen(false);
+      return;
+    }
+    setRenaming(true);
+    try {
+      const res = await fetch(`/guitar-api/songs/${encodeURIComponent(name)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName })
+      });
+      if (res.ok) {
+        message.success('歌名已更新');
+        setSettingsOpen(false);
+        navigate(`/detail/${encodeURIComponent(newName)}`, { replace: true });
+      } else if (res.status === 409) {
+        message.error('该歌名已存在');
+      } else {
+        message.error('重命名失败');
+      }
+    } catch {
+      message.error('重命名失败');
+    } finally {
+      setRenaming(false);
+    }
+  };
+
   const handleReorderSave = async (newOrder) => {
     setSelectedImages(newOrder);
     try {
@@ -360,6 +391,11 @@ function TabsPage() {
   }, [isAutoScrolling, scrollSpeed]);
 
 
+
+  // 打开设置弹窗时同步编辑的歌名
+  useEffect(() => {
+    if (settingsOpen) setEditingName(song?.name || name);
+  }, [settingsOpen, song?.name, name]);
 
   // 浮动栏自动隐藏：仅看图时有效，2秒无操作隐藏
   useEffect(() => {
@@ -472,11 +508,11 @@ function TabsPage() {
               maxScale={3}
               wheel={{ disabled: false, step: 0.001 }}
               pinch={{ disabled: false }}
-              panning={{ disabled: false, velocityDisabled: true }}
+              panning={{ disabled: false, velocityDisabled: !(JSON.parse(localStorage.getItem('guitar-inertia') ?? 'true')) }}
               doubleClick={{ mode: "reset" }}
               limitToBounds={true}
             >
-              <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+              <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }} contentStyle={{ paddingTop: 48 }}>
                 <div className="tabs-grid">
                   {selectedImages.map((url, i) => (
                     <img
@@ -600,7 +636,23 @@ function TabsPage() {
         onCancel={() => setSettingsOpen(false)}
         footer={null}
         width={520}
+        styles={{ body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' } }}
       >
+        {/* 编辑歌名 */}
+        <div style={{ marginBottom: 24 }}>
+          <Text strong style={{ display: 'block', marginBottom: 8 }}>编辑歌名</Text>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Input
+              value={editingName}
+              onChange={(e) => setEditingName(e.target.value)}
+              style={{ flex: 1 }}
+              placeholder="输入新歌名"
+            />
+            <Button type="primary" onClick={handleRename} loading={renaming}>
+              保存
+            </Button>
+          </div>
+        </div>
         {/* 图片排序 */}
         {selectedImages.length > 1 && (
           <div style={{ marginBottom: 24 }}>
@@ -612,58 +664,6 @@ function TabsPage() {
           </div>
         )}
 
-        {/* 重新解析 */}
-        <div style={{ marginBottom: 24 }}>
-          <Text strong style={{ display: 'block', marginBottom: 8 }}>解析其他URL</Text>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Input
-              placeholder="输入吉他谱页面URL"
-              value={customUrl}
-              onChange={(e) => setCustomUrl(e.target.value)}
-              style={{ flex: 1 }}
-            />
-            <Button
-              type="primary"
-              onClick={handleFetchFromUrl}
-              loading={fetching}
-              disabled={!customUrl.trim()}
-            >
-              解析
-            </Button>
-          </div>
-        </div>
-
-        {/* 多列显示 */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <Text strong>同时展示列数</Text>
-            <Space size={4}>
-              <Text style={{ fontSize: 12, color: '#999' }}>{autoColumns ? '自动' : '手动'}</Text>
-              <Switch
-                size="small"
-                checked={autoColumns}
-                onChange={(checked) => {
-                  setAutoColumns(checked);
-                  if (checked) setColumns(getColumnsByViewport(window.innerWidth, window.innerHeight));
-                }}
-              />
-            </Space>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Slider
-              min={1}
-              max={6}
-              value={columns}
-              onChange={(value) => {
-                setColumns(value);
-                setAutoColumns(false);
-              }}
-              style={{ flex: 1 }}
-            />
-            <span style={{ fontSize: 14, color: '#666', minWidth: 36, flexShrink: 0 }}>{columns}列</span>
-          </div>
-        </div>
-
         {/* 操作按钮 */}
         <Space>
           {selectedImages.length > 0 && (
@@ -671,9 +671,6 @@ function TabsPage() {
               清空所有图片
             </Button>
           )}
-          <Button icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
-            上传图片
-          </Button>
         </Space>
       </Modal>
       <input
@@ -711,7 +708,7 @@ function SortableImageItem({ url, index }) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} className="sortable-item" {...attributes} {...listeners}>
       <img src={proxyUrl(url)} alt="" style={{ width: 40, height: 50, objectFit: 'contain', flexShrink: 0 }} />
       <Text ellipsis style={{ flex: 1, fontSize: 13 }}>图片 {index + 1}</Text>
       <HolderOutlined style={{ color: '#999' }} />
