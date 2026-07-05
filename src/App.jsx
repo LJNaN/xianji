@@ -314,6 +314,7 @@ function App() {
     <div className="app-container">
       {contextHolder}
       <Card
+        className="app-card"
         style={{ flex: 1 }}
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -428,7 +429,7 @@ function App() {
             />
           </div>
 
-          <div className="song-grid" style={{ minHeight: 360, alignItems: 'flex-start', alignContent: 'flex-start' }}>
+          <div className="song-grid" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
             {filteredSongs.length === 0 ? (
               <div className="empty-state">
                 <div style={{ fontSize: 48, marginBottom: 12 }}>🎸</div>
