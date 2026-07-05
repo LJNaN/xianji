@@ -28,14 +28,13 @@ body {
 /* 绿点样式 */
 .green-dot {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
-  width: 8px;
-  height: 8px;
+  bottom: 3px;
+  right: 3px;
+  width: 7px;
+  height: 7px;
   background-color: #389e0d;
   border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
 }
 
 /* 空状态样式 */
@@ -86,7 +85,7 @@ body {
 }
 
 .detail-card .ant-card-body {
-  padding: 48px 0 0 0;
+  padding: 0;
   flex: 1;
   min-height: 0;
   display: flex;
@@ -252,6 +251,97 @@ body {
   overflow-y: auto;
 }
 
+/* ============ 深色模式 ============ */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #141414;
+  --bg-card: #1d1d1d;
+  --bg-elevated: #262626;
+  --text: #e5e5e5;
+  --text-secondary: #999;
+  --border: #303030;
+}
+
+html[data-theme="dark"],
+html[data-theme="dark"] .app-container {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+html[data-theme="dark"] .app-container span[style*="color:#666"],
+html[data-theme="dark"] .app-container span[style*="color: #666"],
+html[data-theme="dark"] .app-container p[style*="color:#666"],
+html[data-theme="dark"] .app-container p[style*="color: #666"],
+html[data-theme="dark"] .app-container div[style*="color:#999"],
+html[data-theme="dark"] .app-container div[style*="color: #999"],
+html[data-theme="dark"] .app-container span[style*="color:#999"],
+html[data-theme="dark"] .app-container span[style*="color: #999"],
+html[data-theme="dark"] .app-container p[style*="color:#999"],
+html[data-theme="dark"] .app-container p[style*="color: #999"],
+html[data-theme="dark"] .app-container span[style*="color:#1a1a1a"],
+html[data-theme="dark"] .app-container span[style*="color: #1a1a1a"] {
+  color: var(--text) !important;
+}
+
+html[data-theme="dark"] .detail-card {
+  background: var(--bg-card) !important;
+}
+
+html[data-theme="dark"] .detail-card .ant-card-head {
+  background: var(--bg-elevated) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] .floating-bar {
+  background: var(--bg-elevated) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] .floating-title {
+  color: var(--text) !important;
+}
+
+html[data-theme="dark"] .floating-label,
+html[data-theme="dark"] .floating-speed,
+html[data-theme="dark"] .floating-settings-btn {
+  color: var(--text) !important;
+}
+
+/* Modal（portal 渲染，不在 .app-container 内）中的文字 */
+html[data-theme="dark"] .ant-modal span[style*="color:#999"],
+html[data-theme="dark"] .ant-modal span[style*="color: #999"],
+html[data-theme="dark"] .ant-modal div[style*="color:#999"],
+html[data-theme="dark"] .ant-modal div[style*="color: #999"],
+html[data-theme="dark"] .ant-modal span[style*="color:#666"],
+html[data-theme="dark"] .ant-modal span[style*="color: #666"],
+html[data-theme="dark"] .ant-modal span[style*="color:#1a1a1a"],
+html[data-theme="dark"] .ant-modal span[style*="color: #1a1a1a"] {
+  color: var(--text) !important;
+}
+
+/* 详情页 loading 状态文字 */
+html[data-theme="dark"] .detail-container p {
+  color: var(--text-secondary) !important;
+}
+
+/* 首页「最爱」板块 inline 背景色 */
+html[data-theme="dark"] .favorites-section {
+  background: var(--bg-elevated) !important;
+  border-color: var(--border) !important;
+}
+
+
+/* 详情页拖拽排序项 */
+html[data-theme="dark"] .sortable-item {
+  background: var(--bg-elevated) !important;
+  border-color: var(--border) !important;
+}
+
+/* 谱子图片反色 + 去色：白底黑字的谱子变成黑底白字 */
+html[data-theme="dark"] .detail-image {
+  filter: invert(1) hue-rotate(180deg) grayscale(1);
+}
+
 .detail-card .ant-card-head {
   background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -385,13 +475,6 @@ body {
     height: 28px;
     padding: 0 11px;
     line-height: 1.8;
-  }
-
-  .green-dot {
-    width: 6px;
-    height: 6px;
-    bottom: 2px;
-    right: 2px;
   }
 
   .preview-image {
