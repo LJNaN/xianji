@@ -12,7 +12,13 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const DATA_FILE = path.join(__dirname, 'song_list.json');
+const VISITS_FILE = path.join(__dirname, 'visits.json');
 const IMAGE_DIR = path.join(__dirname, 'images');
+
+// 确保数据文件存在
+for (const f of [DATA_FILE, VISITS_FILE]) {
+  if (!fs.existsSync(f)) fs.writeFileSync(f, '[]', 'utf-8');
+}
 
 app.use(cors());
 app.use(express.json());
@@ -434,10 +440,8 @@ app.post('/guitar-api/visit', (req, res) => {
   const { uuid, userAgent } = req.body;
   if (!uuid) return res.status(400).json({ error: '缺少 uuid' });
 
-  const visitsFile = path.join(__dirname, 'visits.json');
-  let visits = [];
-  if (fs.existsSync(visitsFile)) {
-    try { visits = JSON.parse(fs.readFileSync(visitsFile, 'utf-8')); } catch {}
+  if (fs.existsSync(VISITS_FILE)) {
+    try { visits = JSON.parse(fs.readFileSync(VISITS_FILE, 'utf-8')); } catch {}
   }
 
   visits.push({
@@ -448,7 +452,7 @@ app.post('/guitar-api/visit', (req, res) => {
     userAgent: userAgent || '',
   });
 
-  fs.writeFileSync(visitsFile, JSON.stringify(visits, null, 2), 'utf-8');
+  fs.writeFileSync(VISITS_FILE, JSON.stringify(visits, null, 2), 'utf-8');
   res.json({ ok: true });
 });
 

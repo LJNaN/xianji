@@ -10,7 +10,6 @@ services:
       - "127.0.0.1:5000:5000"
     volumes:
       - ./server/song_list.json:/app/song_list.json
-      - ./server/visits.json:/app/visits.json
       - ./server/images:/app/images
       - ./server/backups:/app/backups
     restart: unless-stopped
@@ -33,7 +32,6 @@ services:
       dockerfile: Dockerfile.backup
     volumes:
       - ./server/song_list.json:/app/song_list.json:ro
-      - ./server/visits.json:/app/visits.json:ro
       - ./server/images:/app/images:ro
       - ./server/backups:/app/backups
     restart: unless-stopped
