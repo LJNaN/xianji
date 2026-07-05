@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, Spin, Alert, Typography, Input, Modal, message, ConfigProvider, Select } from 'antd';
-import { LoadingOutlined, SearchOutlined, PlusOutlined, EditOutlined, CloseOutlined } from '@ant-design/icons';
+import { Button, Card, Spin, Alert, Typography, Input, Modal, message, Select, Switch, Radio } from 'antd';
+import { LoadingOutlined, SearchOutlined, PlusOutlined, EditOutlined, CloseOutlined, SettingOutlined } from '@ant-design/icons';
 import SongItem from './SongItem';
 import './App.css';
 
@@ -21,6 +21,25 @@ function App() {
   const [hasFetched, setHasFetched] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [favoriteSongs, setFavoriteSongs] = useState([]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [inertiaEnabled, setInertiaEnabled] = useState(() => {
+    const saved = localStorage.getItem('guitar-inertia');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [modalHolder, contextHolder] = Modal.useModal();
+
+  const [themeMode, setThemeMode] = useState(() => {
+    return localStorage.getItem('guitar-theme') || 'light';
+  });
+
+  // 持久化设置
+  useEffect(() => {
+    localStorage.setItem('guitar-inertia', JSON.stringify(inertiaEnabled));
+  }, [inertiaEnabled]);
+  useEffect(() => {
+    localStorage.setItem('guitar-theme', themeMode);
+    window.dispatchEvent(new Event('storage'));
+  }, [themeMode]);
 
   // 加载歌单
   useEffect(() => {
@@ -117,7 +136,7 @@ function App() {
 
   // 删除歌曲
   const handleDelete = async (name) => {
-    Modal.confirm({
+    modalHolder.confirm({
       title: '确认删除',
       content: `确定要删除歌曲 "${name}" 吗？`,
       okText: '删除',
@@ -148,8 +167,26 @@ function App() {
 
   // 新增
   const handleAddSong = async () => {
-    if (!newSongName.trim()) {
+    const name = newSongName.trim();
+    if (!name) {
       message.warning('请输入歌曲名称');
+      return;
+    }
+
+    // 检查是否已存在
+    const existing = songs.find(s => s.name === name);
+    if (existing) {
+      modalHolder.confirm({
+        title: '歌曲已存在',
+        content: `「${name}」已存在，是否跳转？`,
+        okText: '跳转',
+        cancelText: '取消',
+        onOk: () => {
+          setIsAddModalOpen(false);
+          setNewSongName('');
+          navigate(`/detail/${encodeURIComponent(name)}`);
+        },
+      });
       return;
     }
 
@@ -157,7 +194,7 @@ function App() {
       const response = await fetch('/guitar-api/songs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newSongName.trim() })
+        body: JSON.stringify({ name })
       });
 
       if (!response.ok) throw new Error('新增失败');
@@ -165,7 +202,7 @@ function App() {
       // 更新本地状态
       const newSong = {
         id: `song-${Date.now()}`,
-        name: newSongName.trim(),
+        name,
         imgUrl: [],
         createdAt: new Date().toISOString(),
       };
@@ -205,14 +242,8 @@ function App() {
   }
 
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: '#389e0d',
-        },
-      }}
-    >
       <div className="app-container">
+        {contextHolder}
         <Card
           style={{ flex: 1 }}
           title={
@@ -236,11 +267,18 @@ function App() {
               <span style={{ color: '#666', alignSelf: 'flex-end', paddingBottom: 2 }}>共 {filteredSongs.length} 首歌曲</span>
             </div>
           }
+          extra={
+            <Button
+              type="text"
+              icon={<SettingOutlined style={{ fontSize: 18 }} />}
+              onClick={() => setSettingsOpen(true)}
+            />
+          }
         >
           <>
             {/* 最爱区域 */}
             {favoriteSongs.length > 0 && (
-              <div style={{ marginBottom: 16, background: '#fff5f5', border: '1px solid #ffd7d5', borderRadius: 8, padding: '8px 8px 4px' }}>
+              <div className="favorites-section" style={{ marginBottom: 16, background: '#fff5f5', border: '1px solid #ffd7d5', borderRadius: 8, padding: '8px 8px 4px' }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: '#e8453c', marginBottom: 8, paddingLeft: 4 }}>
                   ❤️ 最爱
                 </div>
@@ -303,17 +341,29 @@ function App() {
                   <p style={{ color: '#999', fontSize: 16 }}>
                     {searchTerm ? '没有找到匹配的歌曲' : sortMode === 'parsed' ? '还没有已解析的谱子' : sortMode === 'unparsed' ? '所有歌曲都有谱子了' : '还没有添加任何歌曲'}
                   </p>
-                  <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={() => {
-                      setSortMode('latest');
-                      setSearchTerm('');
-                    }}
-                    style={{ marginTop: 16 }}
-                  >
-                    查看全部
-                  </Button>
+                  <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+                    <Button
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      onClick={() => {
+                        setSortMode('latest');
+                        setSearchTerm('');
+                      }}
+                    >
+                      查看全部
+                    </Button>
+                    {searchTerm && (
+                      <Button
+                        icon={<PlusOutlined />}
+                        onClick={() => {
+                          setNewSongName(searchTerm);
+                          setIsAddModalOpen(true);
+                        }}
+                      >
+                        新增「{searchTerm}」
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 filteredSongs.map((song) => (
@@ -330,6 +380,11 @@ function App() {
               )}
             </div>
           </>
+
+          <div style={{ marginTop: '16px', padding: '16px 16px 0 16px', textAlign: 'center', fontSize: 12, color: '#999', borderTop: '1px solid #f0f0f0' }}>
+            谱子都是网上扒的，没收费也没盈利。<br />
+            歌版权归原作者，有啥问题别找我，找我也没用。
+          </div>
         </Card>
 
         {/* 新增弹窗 */}
@@ -348,8 +403,42 @@ function App() {
             onPressEnter={handleAddSong}
           />
         </Modal>
+
+        {/* 全局设置弹窗 */}
+        <Modal
+          title="全局设置"
+          open={settingsOpen}
+          onCancel={() => setSettingsOpen(false)}
+          footer={null}
+          width={400}
+          styles={{ body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' } }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0' }}>
+            <div>
+              <div style={{ fontWeight: 500 }}>拖拽惯性滑步</div>
+              <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>单指拖动图片时松手后是否继续滑动</div>
+            </div>
+            <Switch
+              checked={inertiaEnabled}
+              onChange={(checked) => setInertiaEnabled(checked)}
+            />
+          </div>
+
+          <div style={{ borderTop: '1px solid #f0f0f0', padding: '12px 0' }}>
+            <div style={{ fontWeight: 500, marginBottom: 8 }}>主题模式</div>
+            <Radio.Group
+              value={themeMode}
+              onChange={(e) => setThemeMode(e.target.value)}
+              optionType="button"
+              buttonStyle="solid"
+            >
+              <Radio.Button value="light">浅色</Radio.Button>
+              <Radio.Button value="dark">深色</Radio.Button>
+              <Radio.Button value="system">跟随系统</Radio.Button>
+            </Radio.Group>
+          </div>
+        </Modal>
       </div>
-    </ConfigProvider>
   );
 }
 
