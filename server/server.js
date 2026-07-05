@@ -1,4 +1,10 @@
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+// 若 .env 不存在则自动创建模板
+const envPath = require('path').join(__dirname, '..', '.env');
+if (!require('fs').existsSync(envPath)) {
+  require('fs').writeFileSync(envPath, '# DeepSeek API Key（AI 搜索功能，可前往 https://platform.deepseek.com/ 获取）\nDEEPSEEK_KEY=sk-your-key-here\n', 'utf-8');
+  console.log('[startup] .env 不存在，已创建模板');
+}
+require('dotenv').config({ path: envPath });
 
 const express = require('express');
 const multer = require('multer');
