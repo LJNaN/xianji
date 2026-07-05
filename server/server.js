@@ -1,3 +1,5 @@
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
@@ -122,7 +124,12 @@ async function searchBingResults(query, maxResults = 3) {
 async function parseImagesFromUrl(url) {
   const resp = await axios.get(url, {
     timeout: 20000,
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36' }
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36',
+      'Referer': new URL(url).origin + '/',
+      'Accept': 'text/html,application/xhtml+xml',
+      'Accept-Language': 'zh-CN,zh;q=0.9',
+    }
   });
   const $ = cheerio.load(resp.data);
   const urls = new Set();
@@ -231,49 +238,57 @@ app.post('/guitar-api/tabs/:title', async (req, res) => {
   }
 });
 
-// POST /guitar-api/tabs/:name/auto-fetch — 自动搜索并提取图片（重试最多3个结果）
+// POST /guitar-api/tabs/:name/auto-fetch — 自动搜索并提取图片
 app.post('/guitar-api/tabs/:name/auto-fetch', async (req, res) => {
   const { name } = req.params;
-  const ATTEMPT_TIMEOUT = 5000; // 每个结果 5 秒超时
-  const MAX_ATTEMPTS = 3;
-  const TOTAL_TIMEOUT = 15000; // 总超时 15 秒
+  const ATTEMPT_TIMEOUT = 5000;
+  const MAX_ATTEMPTS = 5;
+  const TOTAL_TIMEOUT = 30000;
 
   try {
-    // 1. 搜索 Bing 获取最多 3 个结果 URL
     const resultUrls = await searchBingResults(`${name}吉他谱`, MAX_ATTEMPTS);
     if (!resultUrls || resultUrls.length === 0) {
       return res.status(404).json({ error: '未在 Bing 搜索到相关结果' });
     }
 
-    // 2. 依次尝试每个结果，每个最多等 5 秒
     const startTime = Date.now();
-    let lastError = '';
+    const attemptLogs = [];
 
     for (let i = 0; i < resultUrls.length; i++) {
       if (Date.now() - startTime > TOTAL_TIMEOUT) {
-        lastError = '总超时 15 秒';
+        attemptLogs.push({ url: resultUrls[i], error: '总超时 30 秒，跳过' });
         break;
       }
+
+      // 每个尝试间隔 1 秒，更真实
+      if (i > 0) await new Promise(r => setTimeout(r, 1000));
+
+      console.log(`[auto-fetch] 正在尝试 (${i + 1}/${resultUrls.length}): ${resultUrls[i]}`);
 
       try {
         const result = await Promise.race([
           parseImagesFromUrl(resultUrls[i]),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('单个结果超时(5s)')), ATTEMPT_TIMEOUT))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('超时(5s)')), ATTEMPT_TIMEOUT))
         ]);
 
         if (result && result.type === 'image' && result.data && result.data.length > 0) {
+          console.log(`[auto-fetch] ✓ 成功: ${resultUrls[i]} (${result.data.length} 张图片)`);
           return res.json({ source_url: resultUrls[i], candidate_images: result.data });
         }
-        lastError = `"${resultUrls[i]}" 未提取到图片`;
+        const msg = '未提取到图片';
+        console.log(`[auto-fetch] ✗ ${resultUrls[i]} — ${msg}`);
+        attemptLogs.push({ url: resultUrls[i], error: msg });
       } catch (e) {
-        lastError = `"${resultUrls[i]}" ${e.message}`;
-        // 继续尝试下一个
+        const msg = e.message;
+        console.log(`[auto-fetch] ✗ ${resultUrls[i]} — ${msg}`);
+        attemptLogs.push({ url: resultUrls[i], error: msg });
       }
     }
 
+    console.log(`[auto-fetch] 所有尝试均失败 (${attemptLogs.length} 个)`);
     res.status(404).json({
-      error: `已尝试 ${resultUrls.length} 个搜索结果，均失败: ${lastError}`,
-      attempts: resultUrls.length
+      error: `已尝试 ${attemptLogs.length} 个搜索结果，均失败`,
+      details: attemptLogs,
     });
   } catch (e) {
     res.status(500).json({ error: `自动获取失败: ${e.message}` });
@@ -376,6 +391,65 @@ app.post('/guitar-api/tabs/:name/upload', upload.array('images', 10), async (req
   target.imgUrl = [...target.imgUrl, ...paths];
   saveSongs(songs);
   res.json({ message: '上传成功', count: paths.length, images: paths });
+});
+
+// POST /guitar-api/ai-search — DeepSeek AI 搜索代理
+app.post('/guitar-api/ai-search', async (req, res) => {
+  const DEEPSEEK_KEY = process.env.DEEPSEEK_KEY;
+  if (!DEEPSEEK_KEY) return res.status(500).json({ error: 'AI 搜索未配置（缺少 DEEPSEEK_KEY）' });
+
+  const { searchTerm, songNames } = req.body;
+  if (!searchTerm || !Array.isArray(songNames)) return res.status(400).json({ error: '参数错误' });
+
+  try {
+    const response = await axios.post('https://api.deepseek.com/v1/chat/completions', {
+      model: 'deepseek-v4-flash',
+      thinking: { type: "disabled" },
+      messages: [
+        {
+          role: 'system',
+          content: `用户搜索了吉他谱关键词。可用的歌曲有：${songNames.join('、')}。从歌曲列表中找出最匹配的，按相关度排序，只返回 JSON 数组`,
+        },
+        { role: 'user', content: searchTerm },
+      ],
+      temperature: 0.1,
+      max_tokens: 5000,
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${DEEPSEEK_KEY}`,
+      },
+      timeout: 15000,
+    });
+
+    res.json(response.data);
+  } catch (err) {
+    console.error('AI search error:', err.message);
+    res.status(502).json({ error: 'AI 搜索失败' });
+  }
+});
+
+// POST /guitar-api/visit — 访问记录
+app.post('/guitar-api/visit', (req, res) => {
+  const { uuid, userAgent } = req.body;
+  if (!uuid) return res.status(400).json({ error: '缺少 uuid' });
+
+  const visitsFile = path.join(__dirname, 'visits.json');
+  let visits = [];
+  if (fs.existsSync(visitsFile)) {
+    try { visits = JSON.parse(fs.readFileSync(visitsFile, 'utf-8')); } catch {}
+  }
+
+  visits.push({
+    date: new Date().toISOString().slice(0, 10),
+    time: new Date().toISOString(),
+    uuid,
+    ip: req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip,
+    userAgent: userAgent || '',
+  });
+
+  fs.writeFileSync(visitsFile, JSON.stringify(visits, null, 2), 'utf-8');
+  res.json({ ok: true });
 });
 
 // 生产环境：打包后提供前端 SPA

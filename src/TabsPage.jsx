@@ -48,6 +48,7 @@ function TabsPage() {
   const [isSliderDragging, setIsSliderDragging] = useState(false);
   const [autoFetching, setAutoFetching] = useState(false);
   const [autoFetchError, setAutoFetchError] = useState(null);
+  const savedImagesRef = useRef([]);
   const [barVisible, setBarVisible] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
   const [heartAnimating, setHeartAnimating] = useState(false);
@@ -157,6 +158,7 @@ function TabsPage() {
   };
 
   const handleAutoFetch = async () => {
+    savedImagesRef.current = selectedImages;
     setAutoFetching(true);
     setAutoFetchError(null);
     try {
@@ -170,7 +172,7 @@ function TabsPage() {
         setSelectedImages([]);
         setShowSelector(true);
       } else {
-        setAutoFetchError(data.error || '未找到相关图片');
+        setAutoFetchError(data);
       }
     } catch (err) {
       setAutoFetchError('自动获取请求失败');
@@ -254,6 +256,7 @@ function TabsPage() {
           });
           if (res.ok) {
             setSelectedImages([]);
+            setSettingsOpen(false);
             message.success('已清空');
           } else {
             message.error('清空失败');
@@ -487,7 +490,7 @@ function TabsPage() {
                   className="floating-settings-btn"
                 />
               </div>
-              {selectedImages.length > 0 && !showSelector && (
+              {!showSelector && (
                 <Button
                   type="text"
                   icon={<SettingOutlined />}
@@ -545,7 +548,21 @@ function TabsPage() {
                 {autoFetchError && (
                   <Alert
                     message="自动获取失败"
-                    description={autoFetchError}
+                    description={
+                      <div style={{ fontSize: 13 }}>
+                        <div>{autoFetchError.error || autoFetchError}</div>
+                        {autoFetchError.details && (
+                          <ul style={{ margin: '6px 0 0', paddingLeft: 18, color: '#888' }}>
+                            {autoFetchError.details.map((d, i) => (
+                              <li key={i} style={{ marginBottom: 2, wordBreak: 'break-all' }}>
+                                <span style={{ color: d.error === '未提取到图片' ? '#666' : '#999' }}>{d.url}</span>
+                                <span style={{ color: '#999' }}> — {d.error}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    }
                     type="warning"
                     showIcon
                     style={{ marginBottom: 16, textAlign: 'left' }}
@@ -611,6 +628,7 @@ function TabsPage() {
             </Space>
 
             <div style={{ marginTop: '16px', paddingBottom: '16px', textAlign: 'center' }}>
+              <div style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>结果不准时可以先取消，再重新点击自动获取</div>
               <Space>
                 <Button
                   type="primary"
@@ -620,7 +638,7 @@ function TabsPage() {
                 >
                   保存选中的 {selectedImages.length} 张图片
                 </Button>
-                <Button onClick={() => setShowSelector(false)}>
+                <Button onClick={() => { setShowSelector(false); setSelectedImages(savedImagesRef.current); }}>
                   取消
                 </Button>
               </Space>

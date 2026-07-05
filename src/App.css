@@ -15,6 +15,7 @@ body {
 .song-grid {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 12px;
   padding: 8px;
 }
@@ -331,6 +332,18 @@ html[data-theme="dark"] .favorites-section {
 }
 
 
+/* 首页 Logo 图片 - 深色模式切换 */
+.xianji-logo {
+  height: 36px;
+  display: block;
+}
+html[data-theme="dark"] .xianji-logo-black {
+  display: none;
+}
+html:not([data-theme="dark"]) .xianji-logo-white {
+  display: none;
+}
+
 /* 详情页拖拽排序项 */
 html[data-theme="dark"] .sortable-item {
   background: var(--bg-elevated) !important;
@@ -406,6 +419,137 @@ html[data-theme="dark"] .detail-image {
   scrollbar-color: #bbb #f1f1f1;
 }
 
+/* AI 搜索栏 - 蓝紫色渐变流光 */
+.ai-search-wrapper {
+  position: relative;
+  width: 260px;
+  flex-shrink: 0;
+  padding: 2px;
+  border-radius: 8px;
+  background: linear-gradient(60deg, #6366f1, #a855f7, #06b6d4, #6366f1, #8b5cf6);
+  background-size: 400% 400%;
+  animation: ai-glow 4s ease infinite;
+}
+
+@keyframes ai-glow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.ai-search-wrapper .control-search {
+  width: 100% !important;
+}
+
+.ai-search-wrapper .ant-input-affix-wrapper {
+  border: none !important;
+  border-radius: 6px 0 0 6px !important;
+  background: #fff !important;
+}
+
+.ai-search-wrapper .ant-input-search-button {
+  border: none !important;
+  background: linear-gradient(135deg, #6366f1, #a855f7) !important;
+}
+
+.ai-search-wrapper .ant-input-search-button .anticon {
+  color: #fff !important;
+}
+
+.ai-search-wrapper .ant-input-search-button:hover {
+  opacity: 0.9 !important;
+}
+
+/* AI 搜索框 输入文字 + placeholder 都是蓝紫渐变 */
+.ai-search-wrapper input {
+  background: linear-gradient(60deg, #6366f1, #a855f7) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  caret-color: #6366f1;
+}
+
+.ai-search-wrapper input::placeholder {
+  background: linear-gradient(60deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #a855f7;
+  opacity: 1;
+}
+
+html[data-theme="dark"] .ai-search-wrapper input {
+  /* 深色模式下 affix-wrapper 背景是 #1d1d1d，input 文字渐变依然生效 */
+  caret-color: #a855f7;
+}
+
+/* AI 加载旋转器 */
+.ai-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: conic-gradient(#6366f1, #a855f7, #6366f1);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px));
+  animation: ai-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes ai-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* AI 状态提示下拉 */
+.ai-suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -2px;
+  right: -2px;
+  z-index: 100;
+  padding: 2px;
+  border-radius: 12px;
+  background: linear-gradient(60deg, #6366f1, #a855f7, #06b6d4, #6366f1, #8b5cf6);
+  background-size: 400% 400%;
+  animation: ai-glow 4s ease infinite;
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.25);
+}
+
+.ai-suggestions-inner {
+  background: #fff;
+  border-radius: 10px;
+  animation: ai-dropdown-in 0.2s ease-out;
+}
+
+@keyframes ai-dropdown-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.ai-suggestions-item {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.ai-suggestions-item-text {
+  background: linear-gradient(60deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 深色模式 AI 搜索 */
+html[data-theme="dark"] .ai-search-wrapper .ant-input-affix-wrapper {
+  background: #1d1d1d !important;
+}
+
+/* 深色模式 AI 下拉 */
+html[data-theme="dark"] .ai-suggestions-inner {
+  background: #262626;
+}
+
 /* 首页控制栏 */
 .control-bar {
   display: flex;
@@ -441,6 +585,14 @@ html[data-theme="dark"] .detail-image {
 
   .preview-image {
     height: 44px;
+  }
+
+  .control-bar {
+    flex-wrap: wrap;
+  }
+
+  .ai-search-wrapper {
+    width: 100%;
   }
 
   .control-bar .control-search {
