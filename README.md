@@ -19,11 +19,14 @@
 
 ## 功能
 
-- **歌单管理** — 增删歌曲、搜索、排序（最新/最早/已解析/未解析）
+- **歌单管理** — 增删歌曲、AI 语义搜索、排序（最新/最早/已解析/未解析）
 - **智能搜谱** — 输入歌名，自动从 Bing 搜索吉他谱并提取图片
+- **AI 搜索** — DeepSeek 驱动，语义理解歌名/曲风搜索（需配置 API Key）
 - **URL 解析** — 粘贴吉他谱网页链接，自动提取页面中的图片
 - **图片浏览** — 多列网格、双指缩放/拖动、自动滚动（带速度调节）
+- **深色模式** — 浅色/深色/跟随系统三种主题
 - **本地收藏** — 收藏常用歌曲，置顶显示
+- **访问统计** — 每日设备访问记录
 - **一键部署** — Docker Compose 编排，三分钟启动
 - **自动备份** — 数据每日备份、图片每周打包
 
@@ -34,6 +37,8 @@
 ```bash
 git clone https://github.com/LJNaN/xianji.git
 cd xianji
+# 配置 DeepSeek API Key（AI 搜索功能，可选）
+echo "DEEPSEEK_KEY=sk-your-key-here" > .env
 docker compose up -d
 ```
 
@@ -62,21 +67,24 @@ npm run dev
 ```
 xianji/
 ├── src/                    # 前端源码（React + Vite）
-│   ├── App.jsx             # 首页：歌单列表
-│   ├── App.css             # 全局样式
+│   ├── App.jsx             # 首页：歌单列表 + AI 搜索
+│   ├── App.css             # 全局样式 + 深色模式
 │   ├── TabsPage.jsx        # 详情页：图片查看/搜索/选择
-│   └── SongItem.jsx        # 歌曲卡片组件
+│   ├── SongItem.jsx        # 歌曲卡片组件
+│   └── assets/             # 静态资源（Logo 等）
 ├── server/                 # 后端（Express）
-│   ├── server.js           # API 服务
+│   ├── server.js           # API 服务 + 访问记录
 │   ├── song_list.json      # 歌单数据
+│   ├── visits.json         # 访问记录
 │   ├── images/             # 下载的吉他谱图片
 │   ├── backups/            # 备份目录
 │   ├── backup.sh           # 定时备份脚本
 │   ├── Dockerfile          # 后端容器镜像
 │   └── Dockerfile.backup   # 备份容器镜像
+├── .env                    # DeepSeek API Key（可选）
 ├── docker-compose.yml      # 编排文件
 ├── Dockerfile              # 前端容器镜像（多阶段构建）
-└── nginx.conf              # Nginx 配置
+└── nginx.conf              # Nginx 配置 + 静态缓存
 ```
 
 ## Docker 架构
@@ -93,7 +101,8 @@ xianji/
 ## 备份策略
 
 - **歌单数据** — 每天备份，保留 90 天
-- **上传图片** — 每周一打包 zip，保留 180 天
+- **访问记录** — 每天备份，保留 90 天
+- **上传图片** — 每周打包 zip，保留 180 天
 - **自动清理** — 过期备份自动删除，无需人工干预
 
 手动触发备份：
