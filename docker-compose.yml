@@ -12,6 +12,7 @@ services:
       - ./server/song_list.json:/app/song_list.json
       - ./server/images:/app/images
       - ./server/backups:/app/backups
+      - ./server/visits.json:/app/visits.json
     restart: unless-stopped
 
   # ---- Nginx 前端 ----
