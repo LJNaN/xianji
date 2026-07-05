@@ -15,9 +15,18 @@ const DATA_FILE = path.join(__dirname, 'song_list.json');
 const VISITS_FILE = path.join(__dirname, 'visits.json');
 const IMAGE_DIR = path.join(__dirname, 'images');
 
-// 确保数据文件存在
+// 确保数据文件存在（若 Docker 挂载为目录则自动修复）
 for (const f of [DATA_FILE, VISITS_FILE]) {
-  if (!fs.existsSync(f)) fs.writeFileSync(f, '[]', 'utf-8');
+  if (fs.existsSync(f)) {
+    const stat = fs.statSync(f);
+    if (stat.isDirectory()) {
+      fs.rmdirSync(f);
+      fs.writeFileSync(f, '[]', 'utf-8');
+      console.log(`[startup] ${f} 是目录，已重建为文件`);
+    }
+  } else {
+    fs.writeFileSync(f, '[]', 'utf-8');
+  }
 }
 
 app.use(cors());
