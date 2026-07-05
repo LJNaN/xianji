@@ -5,6 +5,9 @@ dist/
 # Docker 备份目录
 server/backups/
 
+# 歌单图片目录
+server/images/
+
 # OS 文件
 .DS_Store
 Thumbs.db
