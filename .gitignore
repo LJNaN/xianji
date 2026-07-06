@@ -16,3 +16,13 @@ Thumbs.db
 # 歌单图片（仅跟踪 .gitkeep 占位文件，不跟踪运行时图片）
 server/images/*
 !server/images/.gitkeep
+
+# 运行时数据（SQLite 数据库）
+server/data/
+
+# 运行时 JSON 数据（已迁移到 SQLite）
+server/song_list.json
+server/visits.json
+
+# 迁移备份文件
+server/*.bak

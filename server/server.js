@@ -14,32 +14,65 @@ const path = require('path');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const crypto = require('crypto');
+const db = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const DATA_FILE = path.join(__dirname, 'song_list.json');
-const VISITS_FILE = path.join(__dirname, 'visits.json');
 const IMAGE_DIR = path.join(__dirname, 'images');
 
-// 确保数据文件存在（若 Docker 挂载为目录则自动修复）
-for (const f of [DATA_FILE, VISITS_FILE]) {
-  if (fs.existsSync(f)) {
-    const stat = fs.statSync(f);
-    if (stat.isDirectory()) {
-      fs.rmdirSync(f);
-      fs.writeFileSync(f, '[]', 'utf-8');
-      console.log(`[startup] ${f} 是目录，已重建为文件`);
-    }
+// ---- JSON → SQLite 迁移 ----
+const DATA_FILE = path.join(__dirname, 'song_list.json');
+const VISITS_FILE = path.join(__dirname, 'visits.json');
+
+if (fs.existsSync(DATA_FILE)) {
+  const count = db.prepare('SELECT COUNT(*) as count FROM songs').get().count;
+  if (count === 0) {
+    const songs = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    const insert = db.prepare('INSERT OR IGNORE INTO songs (name, img_url, favorite, created_at, sort_order) VALUES (?, ?, ?, ?, ?)');
+    const tx = db.transaction((songs) => {
+      for (let i = 0; i < songs.length; i++) {
+        const s = songs[i];
+        insert.run(s.name, JSON.stringify(s.imgUrl || []), s.favorite ? 1 : 0, s.createdAt || null, i);
+      }
+    });
+    tx(songs);
+    console.log('[migrate] song_list.json → SQLite 迁移完成');
   } else {
-    fs.writeFileSync(f, '[]', 'utf-8');
+    console.log('[migrate] songs 表已有数据，跳过迁移');
   }
+  fs.renameSync(DATA_FILE, path.join(path.dirname(DATA_FILE), '.' + path.basename(DATA_FILE) + '.bak'));
 }
 
+if (fs.existsSync(VISITS_FILE)) {
+  const count = db.prepare('SELECT COUNT(*) as count FROM visits').get().count;
+  if (count === 0) {
+    const visits = JSON.parse(fs.readFileSync(VISITS_FILE, 'utf-8'));
+    const insert = db.prepare('INSERT INTO visits (date, time, uuid, ip, user_agent) VALUES (?, ?, ?, ?, ?)');
+    const tx = db.transaction((visits) => {
+      for (const v of visits) {
+        insert.run(v.date, v.time, v.uuid, v.ip || null, v.userAgent || null);
+      }
+    });
+    tx(visits);
+    console.log('[migrate] visits.json → SQLite 迁移完成');
+  } else {
+    console.log('[migrate] visits 表已有数据，跳过迁移');
+  }
+  fs.renameSync(VISITS_FILE, path.join(path.dirname(VISITS_FILE), '.' + path.basename(VISITS_FILE) + '.bak'));
+}
+
+// 清理超过 30 天的访问记录
+const purged = db.prepare("DELETE FROM visits WHERE date < date('now', '-30 days')").run();
+if (purged.changes > 0) {
+  console.log(`[startup] 已清理 ${purged.changes} 条超过 30 天的访问记录`);
+}
+
+// ---- Middleware ----
 app.use(cors());
 app.use(express.json());
 app.use('/guitar-images', express.static(IMAGE_DIR));
 
-// 图片代理，解决 CDN 防盗链
+// ---- 图片代理 ----
 app.get('/guitar-api/proxy-image', async (req, res) => {
   const { url } = req.query;
   if (!url) return res.status(400).end();
@@ -77,16 +110,80 @@ const upload = multer({
   }
 });
 
-function loadSongs() {
-  if (fs.existsSync(DATA_FILE)) {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8')).map(s => ({ favorite: false, ...s }));
-  }
-  return [];
+// ---- 数据转换 ----
+function rowToSong(row) {
+  if (!row) return null;
+  const song = { name: row.name, imgUrl: JSON.parse(row.img_url), favorite: !!row.favorite };
+  if (row.created_at) song.createdAt = row.created_at;
+  return song;
 }
 
-function saveSongs(songs) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(songs, null, 2), 'utf-8');
+function getAllSongs() {
+  return db.prepare('SELECT * FROM songs ORDER BY sort_order').all().map(rowToSong);
 }
+
+function getSongByName(name) {
+  return rowToSong(db.prepare('SELECT * FROM songs WHERE name = ?').get(name));
+}
+
+// ---- Songs CRUD ----
+
+app.get('/guitar-api/songs', (req, res) => {
+  res.json(getAllSongs());
+});
+
+app.post('/guitar-api/songs', (req, res) => {
+  const name = (req.body.name || '').trim();
+  if (!name) return res.status(400).json({ error: '歌曲名称不能为空' });
+  const existing = db.prepare('SELECT name FROM songs WHERE name = ?').get(name);
+  if (existing) return res.status(409).json({ error: '歌曲已存在' });
+  const nextOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) + 1 AS v FROM songs').get().v;
+  db.prepare('INSERT INTO songs (name, img_url, favorite, created_at, sort_order) VALUES (?, ?, ?, ?, ?)').run(name, '[]', 0, new Date().toISOString(), nextOrder);
+  res.status(201).json({ message: '歌曲创建成功', song: getSongByName(name) });
+});
+
+app.delete('/guitar-api/songs/:name', (req, res) => {
+  const { name } = req.params;
+  const result = db.prepare('DELETE FROM songs WHERE name = ?').run(name);
+  if (result.changes === 0) return res.status(404).json({ error: '歌曲未找到' });
+  res.json({ message: '歌曲删除成功' });
+});
+
+app.put('/guitar-api/songs/:name/favorite', (req, res) => {
+  const { name } = req.params;
+  const row = db.prepare('SELECT favorite FROM songs WHERE name = ?').get(name);
+  if (!row) return res.status(404).json({ error: '歌曲未找到' });
+  const newVal = row.favorite ? 0 : 1;
+  db.prepare('UPDATE songs SET favorite = ? WHERE name = ?').run(newVal, name);
+  res.json({ message: '更新成功', favorite: !!newVal });
+});
+
+app.put('/guitar-api/songs/:old_name', (req, res) => {
+  const { old_name } = req.params;
+  const newName = (req.body.name || '').trim();
+  if (!newName) return res.status(400).json({ error: '新歌曲名称不能为空' });
+  const target = db.prepare('SELECT name FROM songs WHERE name = ?').get(old_name);
+  if (!target) return res.status(404).json({ error: '原歌曲未找到' });
+  const conflict = db.prepare('SELECT name FROM songs WHERE name = ? AND name != ?').get(newName, old_name);
+  if (conflict) return res.status(409).json({ error: '新歌曲名称已存在' });
+  db.prepare('UPDATE songs SET name = ? WHERE name = ?').run(newName, old_name);
+  res.json({ message: '歌曲重命名成功', song: getSongByName(newName) });
+});
+
+app.post('/guitar-api/songs/reorder', (req, res) => {
+  const { song_names } = req.body;
+  if (!Array.isArray(song_names)) return res.status(400).json({ error: 'song_names 必须是数组' });
+  const all = db.prepare('SELECT name FROM songs').all();
+  const nameSet = new Set(all.map(r => r.name));
+  for (const n of song_names) {
+    if (!nameSet.has(n)) return res.status(400).json({ error: `歌曲 '${n}' 不存在` });
+  }
+  const update = db.prepare('UPDATE songs SET sort_order = ? WHERE name = ?');
+  db.transaction((names) => { for (let i = 0; i < names.length; i++) update.run(i, names[i]); })(song_names);
+  res.json({ message: '歌单排序更新成功' });
+});
+
+// ---- 图片下载 ----
 
 async function downloadImage(url, index) {
   try {
@@ -121,7 +218,6 @@ async function downloadImage(url, index) {
   }
 }
 
-// 从 Bing 搜索获取最多 maxResults 个结果 URL
 async function searchBingResults(query, maxResults = 3) {
   const url = `https://cn.bing.com/search?q=${encodeURIComponent(query)}`;
   const resp = await axios.get(url, {
@@ -141,7 +237,6 @@ async function searchBingResults(query, maxResults = 3) {
   return links.slice(0, maxResults);
 }
 
-// 从页面提取图片
 async function parseImagesFromUrl(url) {
   const resp = await axios.get(url, {
     timeout: 20000,
@@ -167,85 +262,16 @@ async function parseImagesFromUrl(url) {
   return { type: 'image', data: [...urls].slice(0, 10) };
 }
 
-// GET /guitar-api/songs
-app.get('/guitar-api/songs', (req, res) => {
-  res.json(loadSongs());
-});
+// ---- Tabs / 吉他谱 ----
 
-// POST /guitar-api/songs
-app.post('/guitar-api/songs', (req, res) => {
-  const name = (req.body.name || '').trim();
-  if (!name) return res.status(400).json({ error: '歌曲名称不能为空' });
-  const songs = loadSongs();
-  if (songs.some(s => s.name === name)) return res.status(409).json({ error: '歌曲已存在' });
-  const song = { name, imgUrl: [], favorite: false, createdAt: new Date().toISOString() };
-  songs.push(song);
-  saveSongs(songs);
-  res.status(201).json({ message: '歌曲创建成功', song });
-});
-
-// DELETE /guitar-api/songs/:name
-app.delete('/guitar-api/songs/:name', (req, res) => {
-  const { name } = req.params;
-  let songs = loadSongs();
-  const before = songs.length;
-  songs = songs.filter(s => s.name !== name);
-  if (songs.length === before) return res.status(404).json({ error: '歌曲未找到' });
-  saveSongs(songs);
-  res.json({ message: '歌曲删除成功' });
-});
-
-// PUT /guitar-api/songs/:name/favorite — 切换最爱
-app.put('/guitar-api/songs/:name/favorite', (req, res) => {
-  const { name } = req.params;
-  const songs = loadSongs();
-  const target = songs.find(s => s.name === name);
-  if (!target) return res.status(404).json({ error: '歌曲未找到' });
-  target.favorite = !target.favorite;
-  saveSongs(songs);
-  res.json({ message: '更新成功', favorite: target.favorite });
-});
-
-// PUT /guitar-api/songs/:old_name
-app.put('/guitar-api/songs/:old_name', (req, res) => {
-  const { old_name } = req.params;
-  const newName = (req.body.name || '').trim();
-  if (!newName) return res.status(400).json({ error: '新歌曲名称不能为空' });
-  const songs = loadSongs();
-  const target = songs.find(s => s.name === old_name);
-  if (!target) return res.status(404).json({ error: '原歌曲未找到' });
-  if (songs.some(s => s.name === newName && s.name !== old_name)) return res.status(409).json({ error: '新歌曲名称已存在' });
-  target.name = newName;
-  saveSongs(songs);
-  res.json({ message: '歌曲重命名成功', song: target });
-});
-
-// POST /guitar-api/songs/reorder
-app.post('/guitar-api/songs/reorder', (req, res) => {
-  const { song_names } = req.body;
-  if (!Array.isArray(song_names)) return res.status(400).json({ error: 'song_names 必须是数组' });
-  const songs = loadSongs();
-  const map = {};
-  songs.forEach(s => { map[s.name] = s; });
-  for (const name of song_names) {
-    if (!map[name]) return res.status(400).json({ error: `歌曲 '${name}' 不存在` });
-  }
-  const reordered = song_names.map(name => map[name]);
-  saveSongs(reordered);
-  res.json({ message: '歌单排序更新成功' });
-});
-
-// POST /guitar-api/tabs/:title — 解析吉他谱URL
 app.post('/guitar-api/tabs/:title', async (req, res) => {
   const { title } = req.params;
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: '缺少 url 参数' });
-  const songs = loadSongs();
-  let target = songs.find(s => s.name === title);
-  if (!target) {
-    target = { name: title, favorite: false, imgUrl: [] };
-    songs.push(target);
-    saveSongs(songs);
+  let row = db.prepare('SELECT * FROM songs WHERE name = ?').get(title);
+  if (!row) {
+    const nextOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) + 1 AS v FROM songs').get().v;
+    db.prepare('INSERT INTO songs (name, sort_order) VALUES (?, ?)').run(title, nextOrder);
   }
   try {
     const result = await parseImagesFromUrl(url);
@@ -259,7 +285,6 @@ app.post('/guitar-api/tabs/:title', async (req, res) => {
   }
 });
 
-// POST /guitar-api/tabs/:name/auto-fetch — 自动搜索并提取图片
 app.post('/guitar-api/tabs/:name/auto-fetch', async (req, res) => {
   const { name } = req.params;
   const ATTEMPT_TIMEOUT = 5000;
@@ -281,7 +306,6 @@ app.post('/guitar-api/tabs/:name/auto-fetch', async (req, res) => {
         break;
       }
 
-      // 每个尝试间隔 1 秒，更真实
       if (i > 0) await new Promise(r => setTimeout(r, 1000));
 
       console.log(`[auto-fetch] 正在尝试 (${i + 1}/${resultUrls.length}): ${resultUrls[i]}`);
@@ -328,66 +352,51 @@ function deleteOldImages(oldUrls) {
   }
 }
 
-// POST /guitar-api/tabs/:name/save — 保存图片（支持 mode: 'reorder' 做纯排序）
 app.post('/guitar-api/tabs/:name/save', async (req, res) => {
   const { name } = req.params;
   const { images, mode } = req.body;
   if (!Array.isArray(images)) return res.status(400).json({ error: 'images 必须是数组' });
-  const songs = loadSongs();
-  const target = songs.find(s => s.name === name);
-  if (!target) return res.status(404).json({ error: '歌曲未找到' });
+  const row = db.prepare('SELECT * FROM songs WHERE name = ?').get(name);
+  if (!row) return res.status(404).json({ error: '歌曲未找到' });
 
   if (mode === 'reorder') {
-    // 纯排序：只更新顺序，不下载
-    target.imgUrl = images;
-    saveSongs(songs);
+    db.prepare('UPDATE songs SET img_url = ? WHERE name = ?').run(JSON.stringify(images), name);
     return res.json({ message: '顺序已更新' });
   }
 
-  // 首次添加谱子时记录时间
-  const hadImages = target.imgUrl && target.imgUrl.length > 0;
+  const oldUrls = JSON.parse(row.img_url);
+  deleteOldImages(oldUrls);
 
-  // 删除旧的本地图片
-  deleteOldImages(target.imgUrl);
-
-  // 正常保存：下载图片到本地
   const localUrls = [];
   for (let i = 0; i < images.length; i++) {
     const local = await downloadImage(images[i], i + 1);
     if (local) localUrls.push(local);
   }
-  target.imgUrl = localUrls;
-  if (!hadImages && localUrls.length > 0) {
-    target.createdAt = new Date().toISOString();
-  }
-  saveSongs(songs);
+
+  const hadImages = oldUrls.length > 0;
+  const createdAt = (!hadImages && localUrls.length > 0) ? new Date().toISOString() : row.created_at;
+  db.prepare('UPDATE songs SET img_url = ?, created_at = ? WHERE name = ?').run(JSON.stringify(localUrls), createdAt, name);
   res.json({ message: '保存成功', count: localUrls.length });
 });
 
-// PUT /guitar-api/tabs/:name/images — 直接更新图片列表（排序/清空）
 app.put('/guitar-api/tabs/:name/images', (req, res) => {
   const { name } = req.params;
   const { images } = req.body;
   if (!Array.isArray(images)) return res.status(400).json({ error: 'images 必须是数组' });
-  const songs = loadSongs();
-  const target = songs.find(s => s.name === name);
-  if (!target) return res.status(404).json({ error: '歌曲未找到' });
-  target.imgUrl = images;
-  saveSongs(songs);
+  const row = db.prepare('SELECT name FROM songs WHERE name = ?').get(name);
+  if (!row) return res.status(404).json({ error: '歌曲未找到' });
+  db.prepare('UPDATE songs SET img_url = ? WHERE name = ?').run(JSON.stringify(images), name);
   res.json({ message: '图片更新成功', count: images.length });
 });
 
-// POST /guitar-api/tabs/:name/reparse
 app.post('/guitar-api/tabs/:name/reparse', async (req, res) => {
   const { name } = req.params;
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: 'URL 不能为空' });
-  const songs = loadSongs();
-  let target = songs.find(s => s.name === name);
-  if (!target) {
-    target = { name, favorite: false, imgUrl: [] };
-    songs.push(target);
-    saveSongs(songs);
+  let row = db.prepare('SELECT * FROM songs WHERE name = ?').get(name);
+  if (!row) {
+    const nextOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) + 1 AS v FROM songs').get().v;
+    db.prepare('INSERT INTO songs (name, sort_order) VALUES (?, ?)').run(name, nextOrder);
   }
   try {
     const result = await parseImagesFromUrl(url);
@@ -401,20 +410,19 @@ app.post('/guitar-api/tabs/:name/reparse', async (req, res) => {
   }
 });
 
-// POST /guitar-api/tabs/:name/upload — 本地上传图片
 app.post('/guitar-api/tabs/:name/upload', upload.array('images', 10), async (req, res) => {
   const { name } = req.params;
   if (!req.files || req.files.length === 0) return res.status(400).json({ error: '未上传文件' });
-  const songs = loadSongs();
-  const target = songs.find(s => s.name === name);
-  if (!target) return res.status(404).json({ error: '歌曲未找到' });
+  const row = db.prepare('SELECT * FROM songs WHERE name = ?').get(name);
+  if (!row) return res.status(404).json({ error: '歌曲未找到' });
   const paths = req.files.map(f => `/guitar-images/${f.filename}`);
-  target.imgUrl = [...target.imgUrl, ...paths];
-  saveSongs(songs);
+  const existing = JSON.parse(row.img_url);
+  db.prepare('UPDATE songs SET img_url = ? WHERE name = ?').run(JSON.stringify([...existing, ...paths]), name);
   res.json({ message: '上传成功', count: paths.length, images: paths });
 });
 
-// POST /guitar-api/ai-search — DeepSeek AI 搜索代理
+// ---- AI 搜索 ----
+
 app.post('/guitar-api/ai-search', async (req, res) => {
   const DEEPSEEK_KEY = process.env.DEEPSEEK_KEY;
   if (!DEEPSEEK_KEY) return res.status(500).json({ error: 'AI 搜索未配置（缺少 DEEPSEEK_KEY）' });
@@ -427,19 +435,13 @@ app.post('/guitar-api/ai-search', async (req, res) => {
       model: 'deepseek-v4-flash',
       thinking: { type: "disabled" },
       messages: [
-        {
-          role: 'system',
-          content: `用户搜索了吉他谱关键词。可用的歌曲有：${songNames.join('、')}。从歌曲列表中找出最匹配的，按相关度排序，只返回 JSON 数组`,
-        },
+        { role: 'system', content: `用户搜索了吉他谱关键词。可用的歌曲有：${songNames.join('、')}。从歌曲列表中找出最匹配的，按相关度排序，只返回 JSON 数组` },
         { role: 'user', content: searchTerm },
       ],
       temperature: 0.1,
       max_tokens: 5000,
     }, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${DEEPSEEK_KEY}`,
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
       timeout: 15000,
     });
 
@@ -450,28 +452,25 @@ app.post('/guitar-api/ai-search', async (req, res) => {
   }
 });
 
-// POST /guitar-api/visit — 访问记录
+// ---- 访问记录 ----
+
 app.post('/guitar-api/visit', (req, res) => {
   const { uuid, userAgent } = req.body;
   if (!uuid) return res.status(400).json({ error: '缺少 uuid' });
 
-  if (fs.existsSync(VISITS_FILE)) {
-    try { visits = JSON.parse(fs.readFileSync(VISITS_FILE, 'utf-8')); } catch {}
-  }
-
-  visits.push({
-    date: new Date().toISOString().slice(0, 10),
-    time: new Date().toISOString(),
+  db.prepare('INSERT INTO visits (date, time, uuid, ip, user_agent) VALUES (?, ?, ?, ?, ?)').run(
+    new Date().toISOString().slice(0, 10),
+    new Date().toISOString(),
     uuid,
-    ip: req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip,
-    userAgent: userAgent || '',
-  });
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip,
+    userAgent || '',
+  );
 
-  fs.writeFileSync(VISITS_FILE, JSON.stringify(visits, null, 2), 'utf-8');
   res.json({ ok: true });
 });
 
-// 生产环境：打包后提供前端 SPA
+// ---- 静态文件 ----
+
 const distPath = path.join(__dirname, '../dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));

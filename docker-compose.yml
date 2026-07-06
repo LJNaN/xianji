@@ -9,10 +9,9 @@ services:
     ports:
       - "127.0.0.1:5000:5000"
     volumes:
-      - ./server/song_list.json:/app/song_list.json
+      - ./server/data:/app/data
       - ./server/images:/app/images
       - ./server/backups:/app/backups
-      - ./server/visits.json:/app/visits.json
     restart: unless-stopped
 
   # ---- Nginx 前端 ----
@@ -32,7 +31,7 @@ services:
       context: ./server
       dockerfile: Dockerfile.backup
     volumes:
-      - ./server/song_list.json:/app/song_list.json:ro
+      - ./server/data:/app/data:ro
       - ./server/images:/app/images:ro
       - ./server/backups:/app/backups
     restart: unless-stopped
