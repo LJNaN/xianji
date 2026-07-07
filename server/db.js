@@ -8,7 +8,10 @@ const DB_PATH = path.join(DATA_DIR, 'database.sqlite');
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const db = new Database(DB_PATH);
-db.pragma('journal_mode = WAL');
+
+// PERSIST mode: journal file stays on disk (truncated) instead of being deleted,
+// avoiding SQLITE_IOERR_DELETE on Docker bind mounts from Windows
+db.pragma('journal_mode = PERSIST');
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS songs (
