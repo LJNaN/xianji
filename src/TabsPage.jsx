@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Button, Card, Input, Space, Alert, Spin, Typography,
-  Checkbox, message, Modal, Switch, Slider
+  Checkbox, message, Modal, Select, Switch, Slider
 } from 'antd';
 import {
   LoadingOutlined, LeftOutlined,
@@ -670,6 +670,32 @@ function TabsPage() {
               保存
             </Button>
           </div>
+        </div>
+        {/* 多列显示 */}
+        <div style={{ marginBottom: 24 }}>
+          <Text strong style={{ display: 'block', marginBottom: 8 }}>同时展示列数</Text>
+          <Select
+            value={autoColumns ? 'auto' : String(columns)}
+            onChange={(value) => {
+              if (value === 'auto') {
+                setAutoColumns(true);
+                setColumns(getColumnsByViewport(window.innerWidth, window.innerHeight));
+              } else {
+                setColumns(Number(value));
+                setAutoColumns(false);
+              }
+            }}
+            style={{ width: '100%' }}
+            options={[
+              { value: 'auto', label: '自动适配' },
+              { value: '1', label: '1 列' },
+              { value: '2', label: '2 列' },
+              { value: '3', label: '3 列' },
+              { value: '4', label: '4 列' },
+              { value: '5', label: '5 列' },
+              { value: '6', label: '6 列' },
+            ]}
+          />
         </div>
         {/* 图片排序 */}
         {selectedImages.length > 1 && (
