@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, Spin, Alert, Input, Select, Switch, Radio, Modal, App as AntApp } from 'antd';
-import { LoadingOutlined, PlusOutlined, EditOutlined, CloseOutlined, SettingOutlined } from '@ant-design/icons';
+import { LoadingOutlined, PlusOutlined, EditOutlined, CloseOutlined, SettingOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import SongItem from './SongItem';
 import type { Song, SongFromApi, SortMode, ThemeMode, AiSearchResponse } from './types';
 import './App.css';
 import logoBlack from './assets/xianji_black.png';
 import logoWhite from './assets/xianji_white.png';
 
-const { Search } = Input;
+
 
 function App() {
   const navigate = useNavigate();
@@ -31,6 +31,10 @@ function App() {
   });
   const [aiLoading, setAiLoading] = useState(false);
   const [aiEmpty, setAiEmpty] = useState(false);
+  const [aiSearchEnabled, setAiSearchEnabled] = useState(() => {
+    const saved = localStorage.getItem('guitar-ai-search');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
 
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
     return (localStorage.getItem('guitar-theme') as ThemeMode) || 'light';
@@ -40,6 +44,9 @@ function App() {
   useEffect(() => {
     localStorage.setItem('guitar-inertia', JSON.stringify(inertiaEnabled));
   }, [inertiaEnabled]);
+  useEffect(() => {
+    localStorage.setItem('guitar-ai-search', JSON.stringify(aiSearchEnabled));
+  }, [aiSearchEnabled]);
   useEffect(() => {
     localStorage.setItem('guitar-theme', themeMode);
     window.dispatchEvent(new Event('storage'));
@@ -142,14 +149,16 @@ function App() {
 
   // AI 搜索 - 通过后端代理调用 DeepSeek
   useEffect(() => {
-    if (!searchTerm.trim()) {
+    if (!searchTerm.trim() || !aiSearchEnabled) {
       setAiLoading(false);
       setAiEmpty(false);
+      message.destroy('ai-search');
       return;
     }
     const abortController = new AbortController();
     setAiLoading(true);
     setAiEmpty(false);
+    message.open({ key: 'ai-search', content: <div className="ai-toast-border"><div className="ai-toast-body"><span className="ai-toast-spinner" /><span className="ai-gradient-text">AI 思考中...</span></div></div>, duration: 0 });
     const timer = setTimeout(async () => {
       try {
         const songNames = songs.map(s => s.name);
@@ -169,16 +178,20 @@ function App() {
             const matched = songs.filter(s => names.includes(s.name));
             setFilteredSongs(matched);
             setAiEmpty(false);
+            message.destroy('ai-search');
           } else {
             setAiEmpty(true);
+            message.open({ key: 'ai-search', content: <div className="ai-toast-border"><div className="ai-toast-body"><InfoCircleOutlined style={{ color: '#a855f7' }} /><span className="ai-gradient-text">AI 未找到匹配的歌曲</span></div></div>, duration: 3 });
           }
         } else {
           setAiEmpty(true);
+          message.open({ key: 'ai-search', content: <div className="ai-toast-border"><div className="ai-toast-body"><InfoCircleOutlined style={{ color: '#a855f7' }} /><span className="ai-gradient-text">AI 未找到匹配的歌曲</span></div></div>, duration: 3 });
         }
       } catch (err) {
         if ((err as Error).name === 'AbortError') return;
         console.error('AI search error:', err);
         setAiEmpty(true);
+        message.open({ key: 'ai-search', content: <div className="ai-toast-border"><div className="ai-toast-body"><InfoCircleOutlined style={{ color: '#a855f7' }} /><span className="ai-gradient-text">AI 搜索出错</span></div></div>, duration: 3 });
       } finally {
         setAiLoading(false);
       }
@@ -186,8 +199,9 @@ function App() {
     return () => {
       clearTimeout(timer);
       abortController.abort();
+      message.destroy('ai-search');
     };
-  }, [searchTerm, songs]);
+  }, [searchTerm, songs, aiSearchEnabled]);
 
   // 切换最爱
   const handleToggleFavorite = async (name: string) => {
@@ -369,37 +383,14 @@ function App() {
 
           {/* 控制栏 */}
           <div className="control-bar">
-            <div className="ai-search-wrapper">
-              <Search
+            <div className={`ai-search-wrapper${!aiSearchEnabled ? ' no-ai' : ''}`}>
+              <Input
                 placeholder="歌名 曲风 任何你想搜的..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="control-search"
                 prefix={<span style={{ color: '#a855f7' }}>✨</span>}
               />
-              {(aiLoading || aiEmpty) && (
-                <div className="ai-suggestions">
-                  <div className="ai-suggestions-inner">
-                    {aiLoading ? (
-                      <div className="ai-suggestions-item">
-                        <div className="ai-spinner" />
-                        <span className="ai-suggestions-item-text">AI 思考中...</span>
-                      </div>
-                    ) : (
-                      <div className="ai-suggestions-item" style={{ justifyContent: 'space-between' }}>
-                        <span className="ai-suggestions-item-text">AI 未找到匹配的歌曲</span>
-                        <span
-                          className="ai-suggestions-item-text"
-                          style={{ fontSize: 12, cursor: 'pointer' }}
-                          onMouseDown={() => setSearchTerm('')}
-                        >
-                          清空
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
 
             <Button
@@ -435,7 +426,7 @@ function App() {
               <div className="empty-state">
                 <div style={{ fontSize: 48, marginBottom: 12 }}>🎸</div>
                 <p style={{ color: '#999', fontSize: 16 }}>
-                  {searchTerm ? '没有找到匹配的歌曲' : sortMode === 'parsed' ? '还没有已解析的谱子' : sortMode === 'unparsed' ? '所有歌曲都有谱子了' : '还没有添加任何歌曲'}
+                  {searchTerm && aiLoading ? <span className="ai-loading-dots"><span>.</span><span>.</span><span>.</span></span> : searchTerm ? '没有找到匹配的歌曲' : sortMode === 'parsed' ? '还没有已解析的谱子' : sortMode === 'unparsed' ? '所有歌曲都有谱子了' : '还没有添加任何歌曲'}
                 </p>
                 <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
                   <Button
@@ -510,6 +501,17 @@ function App() {
         styles={{ body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' } }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0' }}>
+          <div>
+            <div style={{ fontWeight: 500 }}>AI 搜索</div>
+            <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>关闭后仅使用本地搜索，取消搜索框渐变样式</div>
+          </div>
+          <Switch
+            checked={aiSearchEnabled}
+            onChange={(checked) => setAiSearchEnabled(checked)}
+          />
+        </div>
+
+        <div style={{ borderTop: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0' }}>
           <div>
             <div style={{ fontWeight: 500 }}>拖拽惯性滑步</div>
             <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>单指拖动图片时松手后是否继续滑动</div>

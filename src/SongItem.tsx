@@ -39,6 +39,7 @@ const SongItem = memo<SongItemProps>(({
         <Button
           type="text"
           icon={<MinusCircleOutlined style={{ color: '#ff4d4f' }} />}
+          className="delete-btn"
           onClick={(e) => {
             e.stopPropagation();
             onDelete?.(song.name);
@@ -51,7 +52,6 @@ const SongItem = memo<SongItemProps>(({
             height: '24px',
             padding: '0',
             borderRadius: '50%',
-            background: 'white',
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
             zIndex: 10,
           }}
