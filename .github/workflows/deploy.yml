@@ -31,12 +31,16 @@ jobs:
             --exclude='server/node_modules' --exclude='server/data' \
             --exclude='server/images' --exclude='server/backups' \
             --exclude='dist' \
+            -e 'ssh -o ServerAliveInterval=30' \
             ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/app/xianji/
 
       - name: Docker compose deploy
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
-            cd /app/xianji &&
-            docker compose up --build -d &&
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /app/xianji
+            docker compose up --build -d
             docker image prune -f
-          "
