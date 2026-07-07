@@ -11,7 +11,9 @@
 <p align="center">
   <img src="https://img.shields.io/badge/React-18-61DAFB" alt="React 18">
   <img src="https://img.shields.io/badge/Vite-5-646CFF" alt="Vite 5">
-  <img src="https://img.shields.io/badge/Express-4-000000" alt="Express 4">
+  <img src="https://img.shields.io/badge/TypeScript-✓-3178C6" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Express-5-000000" alt="Express 5">
+  <img src="https://img.shields.io/badge/SQLite-✓-003B57" alt="SQLite">
   <img src="https://img.shields.io/badge/Docker-✓-2496ED" alt="Docker">
 </p>
 
@@ -52,7 +54,7 @@ docker compose up -d
 # 终端 1：启动后端
 cd server
 npm install
-node server.js
+npx tsx server.ts
 
 # 终端 2：启动前端
 cd ..
@@ -66,16 +68,18 @@ npm run dev
 
 ```
 xianji/
-├── src/                    # 前端源码（React + Vite）
-│   ├── App.jsx             # 首页：歌单列表 + AI 搜索
+├── src/                    # 前端源码（React + Vite + TypeScript）
+│   ├── App.tsx             # 首页：歌单列表 + AI 搜索
 │   ├── App.css             # 全局样式 + 深色模式
-│   ├── TabsPage.jsx        # 详情页：图片查看/搜索/选择
-│   ├── SongItem.jsx        # 歌曲卡片组件
+│   ├── TabsPage.tsx        # 详情页：图片查看/搜索/选择
+│   ├── SongItem.tsx        # 歌曲卡片组件
+│   ├── TestPage.tsx        # 拖拽测试页
+│   ├── types.ts            # 共享类型定义
 │   └── assets/             # 静态资源（Logo 等）
-├── server/                 # 后端（Express）
-│   ├── server.js           # API 服务 + 访问记录
-│   ├── song_list.json      # 歌单数据
-│   ├── visits.json         # 访问记录
+├── server/                 # 后端（Express + TypeScript，tsx 运行时）
+│   ├── server.ts           # API 服务 + 访问记录
+│   ├── db.ts               # SQLite 数据库模块
+│   ├── data/               # SQLite 数据库文件
 │   ├── images/             # 下载的吉他谱图片
 │   ├── backups/            # 备份目录
 │   ├── backup.sh           # 定时备份脚本
@@ -84,7 +88,10 @@ xianji/
 ├── .env                    # DeepSeek API Key（可选）
 ├── docker-compose.yml      # 编排文件
 ├── Dockerfile              # 前端容器镜像（多阶段构建）
-└── nginx.conf              # Nginx 配置 + 静态缓存
+├── nginx.conf              # Nginx 配置 + 静态缓存
+├── tsconfig.json           # TypeScript 配置（前端）
+├── tsconfig.node.json      # TypeScript 配置（Vite）
+└── vite.config.ts          # Vite 配置
 ```
 
 ## Docker 架构
@@ -95,8 +102,7 @@ xianji/
 | `backend` | node:20-alpine | 5000 | Express API 服务 |
 | `backup` | alpine:3.19 | — | 每日 9 点自动备份 |
 
-数据文件通过 bind mount 持久化到宿主机 `server/song_list.json` 和 `server/images/`，
-即使用 Docker 也能直接查看和编辑。
+数据文件通过 bind mount 持久化到宿主机，即使用 Docker 也能直接查看和编辑。
 
 ## 备份策略
 
@@ -123,7 +129,9 @@ docker compose up -d --build
 | 前端 | 后端 | 部署 |
 |------|------|------|
 | React 18 | Node.js 20 | Docker |
-| Vite 5 | Express 4 | Nginx |
-| Ant Design 5 | Cheerio | Docker Compose |
+| Vite 5 | Express 5 | Nginx |
+| TypeScript | SQLite (better-sqlite3) | Docker Compose |
+| Ant Design 5 | Cheerio | |
 | React Router 6 | Axios | |
-| react-zoom-pan-pinch | Multer | |
+| react-zoom-pan-pinch | tsx | |
+| dnd-kit | Multer | |

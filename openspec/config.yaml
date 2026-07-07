@@ -3,12 +3,13 @@ schema: spec-driven
 # Project context
 context: |
   Tech stack: React 18, Vite 5, Ant Design 5, Express 4, Node.js
-  Language: JavaScript (JSX)
+  Language: TypeScript (TSX)
   UI: Ant Design 5 + @dnd-kit 拖拽 + react-zoom-pan-pinch 图片缩放
   State: React hooks (useState, useEffect, useCallback)
   Router: react-router-dom v6
   Build: Vite 5
-  Data: JSON file storage (server/song_list.json)
+  Runtime: tsx (esbuild-based TypeScript runner)
+  Data: SQLite (better-sqlite3, PERSIST journal mode)
   Project: Guitar tab management app "弦集"
   Domain: Guitar tablature collection & browsing
 
