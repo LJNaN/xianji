@@ -6,7 +6,7 @@ Define the data model, storage format, and constraints for the guitar tab manage
 ## Requirements
 
 ### Requirement: Song Data Model
-Each song SHALL be represented as a JSON object with name, image URLs, and optional creation timestamp.
+Each song SHALL be represented as a JSON object with name, image URLs, and optional creation timestamp, stored in a SQLite database.
 
 #### Scenario: Song creation
 - GIVEN a new song is created via the API

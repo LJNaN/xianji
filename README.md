@@ -15,6 +15,7 @@
   <img src="https://img.shields.io/badge/Express-5-000000" alt="Express 5">
   <img src="https://img.shields.io/badge/SQLite-✓-003B57" alt="SQLite">
   <img src="https://img.shields.io/badge/Docker-✓-2496ED" alt="Docker">
+  <img src="https://img.shields.io/badge/GitHub_Actions-✓-2088FF" alt="GitHub Actions">
 </p>
 
 ---
@@ -118,6 +119,18 @@ docker compose exec backup /app/backup.sh
 ```
 
 ## 更新
+
+### 自动部署（推荐）
+
+push 到 `main` 分支后 GitHub Actions 自动执行：
+
+1. 构建前端验证编译
+2. rsync 同步代码到服务器
+3. `docker compose up --build -d` 重建并重启容器
+
+无需手动登录服务器。
+
+### 手动更新
 
 ```bash
 git pull
