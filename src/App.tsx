@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, Spin, Alert, Input, Modal, message, Select, Switch, Radio } from 'antd';
+import { Button, Card, Spin, Alert, Input, Select, Switch, Radio, Modal, App as AntApp } from 'antd';
 import { LoadingOutlined, PlusOutlined, EditOutlined, CloseOutlined, SettingOutlined } from '@ant-design/icons';
 import SongItem from './SongItem';
+import type { Song, SongFromApi, SortMode, ThemeMode, AiSearchResponse } from './types';
 import './App.css';
 import logoBlack from './assets/xianji_black.png';
 import logoWhite from './assets/xianji_white.png';
@@ -11,17 +12,18 @@ const { Search } = Input;
 
 function App() {
   const navigate = useNavigate();
-  const [songs, setSongs] = useState([]);
-  const [filteredSongs, setFilteredSongs] = useState([]);
+  const { message, modal } = AntApp.useApp();
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [filteredSongs, setFilteredSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newSongName, setNewSongName] = useState('');
-  const [sortMode, setSortMode] = useState('latest');
+  const [sortMode, setSortMode] = useState<SortMode>('latest');
   const [hasFetched, setHasFetched] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [favoriteSongs, setFavoriteSongs] = useState([]);
+  const [favoriteSongs, setFavoriteSongs] = useState<Song[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [inertiaEnabled, setInertiaEnabled] = useState(() => {
     const saved = localStorage.getItem('guitar-inertia');
@@ -29,10 +31,9 @@ function App() {
   });
   const [aiLoading, setAiLoading] = useState(false);
   const [aiEmpty, setAiEmpty] = useState(false);
-  const [modalHolder, contextHolder] = Modal.useModal();
 
-  const [themeMode, setThemeMode] = useState(() => {
-    return localStorage.getItem('guitar-theme') || 'light';
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
+    return (localStorage.getItem('guitar-theme') as ThemeMode) || 'light';
   });
 
   // 持久化设置
@@ -68,11 +69,11 @@ function App() {
         if (!response.ok) throw new Error('网络错误');
         return response.json();
       })
-      .then(data => {
-        const songData = Array.isArray(data)
+      .then((data: SongFromApi[]) => {
+        const songData: Song[] = Array.isArray(data)
           ? data.map((item, idx) => ({
-            id: item.id || `song-${idx}`,
-            name: item.name || item,
+            id: (item as any).id || `song-${idx}`,
+            name: item.name,
             imgUrl: Array.isArray(item.imgUrl) ? item.imgUrl : [],
             favorite: item.favorite || false,
             createdAt: item.createdAt || null,
@@ -110,13 +111,13 @@ function App() {
     }
 
     // 排序（未解析的 createdAt 为 null，排到最后）
-    const sortByDate = (a, b, asc) => {
+    const sortByDate = (a: Song, b: Song, asc: boolean) => {
       if (!a.createdAt && !b.createdAt) return 0;
       if (!a.createdAt) return 1;
       if (!b.createdAt) return -1;
       return asc
-        ? new Date(a.createdAt) - new Date(b.createdAt)
-        : new Date(b.createdAt) - new Date(a.createdAt);
+        ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     };
 
     // 排序
@@ -159,11 +160,11 @@ function App() {
           body: JSON.stringify({ searchTerm, songNames }),
         });
         if (!res.ok) throw new Error(`API ${res.status}`);
-        const data = await res.json();
+        const data: AiSearchResponse = await res.json();
         const content = data.choices?.[0]?.message?.content || '';
         const match = content.match(/\[[\s\S]*?\]/);
         if (match) {
-          const names = JSON.parse(match[0]).filter(n => songNames.includes(n));
+          const names: string[] = JSON.parse(match[0]).filter((n: string) => songNames.includes(n));
           if (names.length > 0) {
             const matched = songs.filter(s => names.includes(s.name));
             setFilteredSongs(matched);
@@ -175,7 +176,7 @@ function App() {
           setAiEmpty(true);
         }
       } catch (err) {
-        if (err.name === 'AbortError') return;
+        if ((err as Error).name === 'AbortError') return;
         console.error('AI search error:', err);
         setAiEmpty(true);
       } finally {
@@ -189,13 +190,13 @@ function App() {
   }, [searchTerm, songs]);
 
   // 切换最爱
-  const handleToggleFavorite = async (name) => {
+  const handleToggleFavorite = async (name: string) => {
     try {
       const res = await fetch(`/guitar-api/songs/${encodeURIComponent(name)}/favorite`, {
         method: 'PUT',
       });
       if (!res.ok) throw new Error('请求失败');
-      const data = await res.json();
+      const data = await res.json() as { favorite: boolean };
       setSongs(prev => prev.map(s => s.name === name ? { ...s, favorite: data.favorite } : s));
       setFilteredSongs(prev => prev.map(s => s.name === name ? { ...s, favorite: data.favorite } : s));
     } catch (err) {
@@ -204,8 +205,8 @@ function App() {
   };
 
   // 删除歌曲
-  const handleDelete = async (name) => {
-    modalHolder.confirm({
+  const handleDelete = async (name: string) => {
+    modal.confirm({
       title: '确认删除',
       content: `确定要删除歌曲 "${name}" 吗？`,
       okText: '删除',
@@ -245,7 +246,7 @@ function App() {
     // 检查是否已存在
     const existing = songs.find(s => s.name === name);
     if (existing) {
-      modalHolder.confirm({
+      modal.confirm({
         title: '歌曲已存在',
         content: `「${name}」已存在，是否跳转？`,
         okText: '跳转',
@@ -269,10 +270,11 @@ function App() {
       if (!response.ok) throw new Error('新增失败');
 
       // 更新本地状态
-      const newSong = {
+      const newSong: Song = {
         id: `song-${Date.now()}`,
         name,
         imgUrl: [],
+        favorite: false,
         createdAt: new Date().toISOString(),
       };
       const updatedSongs = [...songs, newSong];
@@ -287,7 +289,7 @@ function App() {
     }
   };
 
-  const handleSongClick = (name) => {
+  const handleSongClick = (name: string) => {
     if (isEditing) return;
     const song = songs.find(s => s.name === name);
     navigate(`/detail/${encodeURIComponent(name)}`, { state: { song } });
@@ -312,7 +314,6 @@ function App() {
 
   return (
     <div className="app-container">
-      {contextHolder}
       <Card
         className="app-card"
         style={{ flex: 1 }}
@@ -416,7 +417,7 @@ function App() {
             </Button>
             <Select
               value={sortMode}
-              onChange={(value) => setSortMode(value)}
+              onChange={(value: SortMode) => setSortMode(value)}
               className="control-sort"
               options={[
                 { value: 'latest', label: '最新添加' },
@@ -523,7 +524,7 @@ function App() {
           <div style={{ fontWeight: 500, marginBottom: 8 }}>主题模式</div>
           <Radio.Group
             value={themeMode}
-            onChange={(e) => setThemeMode(e.target.value)}
+            onChange={(e) => setThemeMode(e.target.value as ThemeMode)}
             optionType="button"
             buttonStyle="solid"
           >

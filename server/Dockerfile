@@ -6,10 +6,10 @@ RUN apk add --no-cache python3 make g++
 
 # 安装应用依赖
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm install
 
 # 复制源码
-COPY server.js db.js ./
+COPY . .
 
 EXPOSE 5000
-CMD ["node", "server.js"]
+CMD ["npx", "tsx", "server.ts"]

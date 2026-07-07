@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Button, Card, Input, Space, Alert, Spin, Typography,
-  Checkbox, message, Modal, Select, Switch, Slider
+  Checkbox, Select, Switch, Slider, Modal, App
 } from 'antd';
 import {
   LoadingOutlined, LeftOutlined,
@@ -11,52 +11,54 @@ import {
 } from '@ant-design/icons';
 import {
   DndContext, closestCenter, PointerSensor, KeyboardSensor,
-  useSensor, useSensors
+  useSensor, useSensors, type DragEndEvent
 } from '@dnd-kit/core';
 import {
   SortableContext, verticalListSortingStrategy, useSortable, arrayMove
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import { TransformWrapper, TransformComponent, type ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
+import type { SongFromApi, AutoFetchResponse } from './types';
 import './App.css';
 
 const { Title, Text } = Typography;
 
-function proxyUrl(url) {
+function proxyUrl(url: string): string {
   if (!url || url.startsWith('/guitar-images/')) return url;
   return `/guitar-api/proxy-image?url=${encodeURIComponent(url)}`;
 }
 
 function TabsPage() {
-  const { name } = useParams();
+  const { name } = useParams<{ name: string }>();
   const navigate = useNavigate();
-  const [song, setSong] = useState(null);
+  const [song, setSong] = useState<SongFromApi | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [customUrl, setCustomUrl] = useState('');
-  const [candidateImages, setCandidateImages] = useState([]);
-  const [selectedImages, setSelectedImages] = useState([]);
+  const [candidateImages, setCandidateImages] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [showSelector, setShowSelector] = useState(false);
   const [saving, setSaving] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(1.0);
-  const transformRef = useRef(null);
-  const scrollRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
+  const scrollRef = useRef<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isSliderDragging, setIsSliderDragging] = useState(false);
   const [autoFetching, setAutoFetching] = useState(false);
-  const [autoFetchError, setAutoFetchError] = useState(null);
-  const savedImagesRef = useRef([]);
+  const [autoFetchError, setAutoFetchError] = useState<AutoFetchResponse | string | null>(null);
+  const savedImagesRef = useRef<string[]>([]);
   const [barVisible, setBarVisible] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
   const [heartAnimating, setHeartAnimating] = useState(false);
-  const [editingName, setEditingName] = useState(name);
+  const [editingName, setEditingName] = useState(name || '');
   const [renaming, setRenaming] = useState(false);
-  const hideTimerRef = useRef(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { message, modal } = App.useApp();
 
-  function getColumnsByViewport(w, h) {
+  function getColumnsByViewport(w: number, h: number): number {
     const ratio = w / h;
 
     // 窄屏手机：永远 1 列
@@ -89,7 +91,7 @@ function TabsPage() {
   useEffect(() => {
     if (!autoColumns) return;
 
-    let timer;
+    let timer: ReturnType<typeof setTimeout>;
     const handleResize = () => {
       clearTimeout(timer);
       timer = setTimeout(() => {
@@ -107,7 +109,7 @@ function TabsPage() {
   useEffect(() => {
     fetch('/guitar-api/songs')
       .then(res => res.json())
-      .then(songs => {
+      .then((songs: SongFromApi[]) => {
         const found = songs.find(s => s.name === name);
         if (found) {
           setSong(found);
@@ -121,7 +123,7 @@ function TabsPage() {
           setLoading(false);
         }
       })
-      .catch(err => {
+      .catch(() => {
         setError('加载失败');
         setLoading(false);
       });
@@ -136,23 +138,22 @@ function TabsPage() {
 
     setFetching(true);
     try {
-      const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name)}`, {
+      const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name || '')}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: customUrl })
       });
-      const data = await res.json();
+      const data: AutoFetchResponse = await res.json();
       if (res.ok) {
         setCandidateImages(data.candidate_images || []);
         setShowSelector(true);
         setSelectedImages([]);
-        setFetching(false);
       } else {
         message.error(data.error || '从该页面提取图片失败');
-        setFetching(false);
       }
-    } catch (err) {
+    } catch {
       message.error('请求失败');
+    } finally {
       setFetching(false);
     }
   };
@@ -162,11 +163,11 @@ function TabsPage() {
     setAutoFetching(true);
     setAutoFetchError(null);
     try {
-      const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name)}/auto-fetch`, {
+      const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name || '')}/auto-fetch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
-      const data = await res.json();
+      const data: AutoFetchResponse & { error?: string } = await res.json();
       if (res.ok && data.candidate_images && data.candidate_images.length > 0) {
         setCandidateImages(data.candidate_images);
         setSelectedImages([]);
@@ -174,14 +175,14 @@ function TabsPage() {
       } else {
         setAutoFetchError(data);
       }
-    } catch (err) {
+    } catch {
       setAutoFetchError('自动获取请求失败');
     } finally {
       setAutoFetching(false);
     }
   };
 
-  const toggleImageSelection = (url) => {
+  const toggleImageSelection = (url: string) => {
     setSelectedImages(prev =>
       prev.includes(url)
         ? prev.filter(u => u !== url)
@@ -197,23 +198,22 @@ function TabsPage() {
 
     setSaving(true);
     try {
-      const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name)}/save`, {
+      const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name || '')}/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ images: selectedImages })
       });
-      const data = await res.json();
+      const data = await res.json() as { error?: string };
       if (res.ok) {
         message.success('保存成功！');
-        setSong(prev => ({ ...prev, imgUrl: selectedImages }));
+        setSong(prev => prev ? { ...prev, imgUrl: selectedImages } : prev);
         setShowSelector(false);
-        setSaving(false);
       } else {
         setError(data.error || '保存失败');
-        setSaving(false);
       }
-    } catch (err) {
+    } catch {
       setError('保存失败');
+    } finally {
       setSaving(false);
     }
   };
@@ -230,9 +230,9 @@ function TabsPage() {
       setTimeout(() => setHeartAnimating(false), 800);
     }
     try {
-      const res = await fetch(`/guitar-api/songs/${encodeURIComponent(name)}/favorite`, { method: 'PUT' });
+      const res = await fetch(`/guitar-api/songs/${encodeURIComponent(name || '')}/favorite`, { method: 'PUT' });
       if (!res.ok) throw new Error('请求失败');
-      const data = await res.json();
+      const data = await res.json() as { favorite: boolean };
       setIsFavorited(data.favorite);
     } catch (err) {
       console.error('切换最爱失败:', err);
@@ -241,7 +241,7 @@ function TabsPage() {
   };
 
   const handleClearImages = async () => {
-    Modal.confirm({
+    modal.confirm({
       title: '确认清空',
       content: '确定要清空所有吉他谱图片吗？',
       okText: '清空',
@@ -249,7 +249,7 @@ function TabsPage() {
       cancelText: '取消',
       onOk: async () => {
         try {
-          const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name)}/save`, {
+          const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name || '')}/save`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ images: [] })
@@ -276,7 +276,7 @@ function TabsPage() {
     }
     setRenaming(true);
     try {
-      const res = await fetch(`/guitar-api/songs/${encodeURIComponent(name)}`, {
+      const res = await fetch(`/guitar-api/songs/${encodeURIComponent(name || '')}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newName })
@@ -297,10 +297,10 @@ function TabsPage() {
     }
   };
 
-  const handleReorderSave = async (newOrder) => {
+  const handleReorderSave = async (newOrder: string[]) => {
     setSelectedImages(newOrder);
     try {
-      const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name)}/save`, {
+      const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name || '')}/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ images: newOrder, mode: 'reorder' })
@@ -311,33 +311,35 @@ function TabsPage() {
     }
   };
 
-  const handleUpload = async (e) => {
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     const formData = new FormData();
     for (const f of files) formData.append('images', f);
-    try {
-      const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name)}/upload`, {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setSelectedImages(prev => [...prev, ...data.images]);
-        message.success(`上传成功 ${data.count} 张`);
-      } else {
-        message.error(data.error || '上传失败');
+    (async () => {
+      try {
+        const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name || '')}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json() as { count: number; images: string[]; error?: string };
+        if (res.ok) {
+          setSelectedImages(prev => [...prev, ...data.images]);
+          message.success(`上传成功 ${data.count} 张`);
+        } else {
+          message.error(data.error || '上传失败');
+        }
+      } catch {
+        message.error('上传失败');
       }
-    } catch {
-      message.error('上传失败');
-    }
+    })();
     e.target.value = '';
   };
 
   // 自动滚动：通过 transformRef 控制位置
   useEffect(() => {
     if (!isAutoScrolling || scrollSpeed <= 0) {
-      if (scrollRef.current) {
+      if (scrollRef.current !== null) {
         cancelAnimationFrame(scrollRef.current);
         scrollRef.current = null;
       }
@@ -348,7 +350,7 @@ function TabsPage() {
     let lastTime = performance.now();
     let remainder = 0;
 
-    const animate = (now) => {
+    const animate = (now: number) => {
       const dt = Math.min(now - lastTime, 100);
       lastTime = now;
 
@@ -386,7 +388,7 @@ function TabsPage() {
     scrollRef.current = requestAnimationFrame(animate);
 
     return () => {
-      if (scrollRef.current) {
+      if (scrollRef.current !== null) {
         cancelAnimationFrame(scrollRef.current);
         scrollRef.current = null;
       }
@@ -397,7 +399,7 @@ function TabsPage() {
 
   // 打开设置弹窗时同步编辑的歌名
   useEffect(() => {
-    if (settingsOpen) setEditingName(song?.name || name);
+    if (settingsOpen) setEditingName(song?.name || name || '');
   }, [settingsOpen, song?.name, name]);
 
   // 浮动栏自动隐藏：仅看图时有效，2秒无操作隐藏
@@ -511,7 +513,7 @@ function TabsPage() {
               maxScale={3}
               wheel={{ disabled: false, step: 0.001 }}
               pinch={{ disabled: false }}
-              panning={{ disabled: false, velocityDisabled: !(JSON.parse(localStorage.getItem('guitar-inertia') ?? 'true')) }}
+              panning={{ disabled: false, velocityDisabled: !(JSON.parse(localStorage.getItem('guitar-inertia') ?? 'true') as boolean) }}
               doubleClick={{ mode: "reset" }}
               limitToBounds={true}
             >
@@ -550,10 +552,10 @@ function TabsPage() {
                     message="自动获取失败"
                     description={
                       <div style={{ fontSize: 13 }}>
-                        <div>{autoFetchError.error || autoFetchError}</div>
-                        {autoFetchError.details && (
+                        <div>{(autoFetchError as AutoFetchResponse).error || String(autoFetchError)}</div>
+                        {(autoFetchError as AutoFetchResponse).details && (
                           <ul style={{ margin: '6px 0 0', paddingLeft: 18, color: '#888' }}>
-                            {autoFetchError.details.map((d, i) => (
+                            {(autoFetchError as AutoFetchResponse).details!.map((d, i) => (
                               <li key={i} style={{ marginBottom: 2, wordBreak: 'break-all' }}>
                                 <span style={{ color: d.error === '未提取到图片' ? '#666' : '#999' }}>{d.url}</span>
                                 <span style={{ color: '#999' }}> — {d.error}</span>
@@ -574,7 +576,7 @@ function TabsPage() {
                   </Button>
                   <Button
                     target="_blank"
-                    href={`https://cn.bing.com/search?q=${encodeURIComponent(name)}吉他谱`}
+                    href={`https://cn.bing.com/search?q=${encodeURIComponent(name || '')}吉他谱`}
                     icon={<SearchOutlined />}
                     block
                   >
@@ -730,7 +732,7 @@ function TabsPage() {
 }
 
 // 排序列表中的可拖拽图片项
-function SortableImageItem({ url, index }) {
+function SortableImageItem({ url, index }: { url: string; index: number }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: url,
   });
@@ -761,17 +763,17 @@ function SortableImageItem({ url, index }) {
 }
 
 // 设置弹窗中的排序列表
-function SettingsImageList({ images, onReorder }) {
+function SettingsImageList({ images, onReorder }: { images: string[]; onReorder: (newOrder: string[]) => void }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor)
   );
 
-  const handleDragEnd = (event) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (active.id !== over?.id) {
       const oldIndex = images.findIndex((url) => url === active.id);
-      const newIndex = images.findIndex((url) => url === over.id);
+      const newIndex = images.findIndex((url) => url === over?.id);
       onReorder(arrayMove(images, oldIndex, newIndex));
     }
   };

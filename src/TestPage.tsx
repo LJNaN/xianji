@@ -7,6 +7,8 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
+  type DragStartEvent,
+  type DragEndEvent,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -19,10 +21,15 @@ import { CSS } from '@dnd-kit/utilities';
 import { Button, Card, Typography } from 'antd';
 import { HeartOutlined } from '@ant-design/icons';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
+
+interface Item {
+  id: string;
+  text: string;
+}
 
 // 拖拽项组件（使用 dnd-kit）
-const DraggableItem = ({ id, text, isDragging }) => {
+function DraggableItem({ id, text, isDragging }: { id: string; text: string; isDragging: boolean }) {
   const {
     attributes,
     listeners,
@@ -35,7 +42,7 @@ const DraggableItem = ({ id, text, isDragging }) => {
     transform: CSS.Transform.toString(transform),
     transition: isDragging ? 'none' : transition,
     opacity: isDragging ? 0.6 : 1,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.15)' as const,
     borderRadius: '12px',
     padding: '16px',
     margin: '8px 0',
@@ -62,18 +69,18 @@ const DraggableItem = ({ id, text, isDragging }) => {
       </div>
     </div>
   );
-};
+}
 
 // 主测试页面
 const TestPage = () => {
-  const [items, setItems] = useState([
+  const [items, setItems] = useState<Item[]>([
     { id: '1', text: '拖拽我试试 🎸' },
     { id: '2', text: '我可以移动位置 ✨' },
     { id: '3', text: '动画很流畅吧？ 💫' },
     { id: '4', text: '试试拖到其他位置 🔄' },
     { id: '5', text: '享受拖拽乐趣！ 😊' },
   ]);
-  const [activeId, setActiveId] = useState(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   // dnd-kit 传感器配置（移动端优化）
   const sensors = useSensors(
@@ -87,18 +94,18 @@ const TestPage = () => {
     })
   );
 
-  const handleDragStart = useCallback((event) => {
-    setActiveId(event.active.id);
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(String(event.active.id));
   }, []);
 
-  const handleDragEnd = useCallback((event) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     setActiveId(null);
     const { active, over } = event;
 
     if (active.id !== over?.id) {
       setItems((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
+        const newIndex = items.findIndex((item) => item.id === over!.id);
         return arrayMove(items, oldIndex, newIndex);
       });
     }
@@ -128,9 +135,9 @@ const TestPage = () => {
         borderRadius: '16px',
         boxShadow: '0 12px 32px rgba(0,0,0,0.1)'
       }}>
-        <Title level={2} style={{ textAlign: 'center', marginBottom: '24px', color: '#389e0d' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px', fontSize: 24, fontWeight: 700, color: '#389e0d' }}>
           🎯 React DnD 动画测试 Demo
-        </Title>
+        </div>
 
         <div style={{
           textAlign: 'center',

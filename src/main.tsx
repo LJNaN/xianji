@@ -1,26 +1,27 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ConfigProvider, theme } from 'antd';
+import { ConfigProvider, theme, App as AntApp } from 'antd';
 import App from './App';
 import TabsPage from './TabsPage';
 import TestPage from './TestPage';
+import type { ThemeMode } from './types';
 
 function Root() {
-  const [themeMode, setThemeMode] = useState(() => {
-    return localStorage.getItem('guitar-theme') || 'light';
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
+    return (localStorage.getItem('guitar-theme') as ThemeMode) || 'light';
   });
 
   // 监听其他页面（如 App.jsx）修改 localStorage 后的变化
   useEffect(() => {
     const handler = () => {
-      const saved = localStorage.getItem('guitar-theme') || 'light';
+      const saved = (localStorage.getItem('guitar-theme') as ThemeMode) || 'light';
       setThemeMode(saved);
     };
     window.addEventListener('storage', handler);
     // 轮询兼容同页面修改
     const timer = setInterval(() => {
-      const saved = localStorage.getItem('guitar-theme') || 'light';
+      const saved = (localStorage.getItem('guitar-theme') as ThemeMode) || 'light';
       if (saved !== themeMode) setThemeMode(saved);
     }, 500);
     return () => {
@@ -52,6 +53,7 @@ function Root() {
           },
         }}
       >
+        <AntApp>
         <BrowserRouter basename="/guitar">
           <Routes>
             <Route path="/" element={<App />} />
@@ -59,9 +61,10 @@ function Root() {
             <Route path="/test" element={<TestPage />} />
           </Routes>
         </BrowserRouter>
+        </AntApp>
       </ConfigProvider>
     </React.StrictMode>
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
+ReactDOM.createRoot(document.getElementById('root')!).render(<Root />);

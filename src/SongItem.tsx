@@ -1,8 +1,18 @@
 import React, { memo } from 'react';
 import { Button } from 'antd';
 import { MinusCircleOutlined, HeartFilled } from '@ant-design/icons';
+import type { Song } from './types';
 
-const SongItem = memo(({
+interface SongItemProps {
+  song: Song;
+  favorite: boolean;
+  isEditing?: boolean;
+  onSongClick: (name: string) => void;
+  onDelete?: (name: string) => void;
+  onToggleFavorite: (name: string) => void;
+}
+
+const SongItem = memo<SongItemProps>(({
   song,
   favorite,
   isEditing,
@@ -31,7 +41,7 @@ const SongItem = memo(({
           icon={<MinusCircleOutlined style={{ color: '#ff4d4f' }} />}
           onClick={(e) => {
             e.stopPropagation();
-            onDelete(song.name);
+            onDelete?.(song.name);
           }}
           style={{
             position: 'absolute',

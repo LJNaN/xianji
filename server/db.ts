@@ -1,6 +1,6 @@
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+import Database from 'better-sqlite3';
+import path from 'path';
+import fs from 'fs';
 
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_PATH = path.join(DATA_DIR, 'database.sqlite');
@@ -35,4 +35,22 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_visits_date ON visits(date);
 `);
 
-module.exports = db;
+export default db;
+
+export interface SongRow {
+  id: number;
+  name: string;
+  img_url: string;
+  favorite: number;
+  created_at: string | null;
+  sort_order: number;
+}
+
+export interface VisitRow {
+  id: number;
+  date: string;
+  time: string;
+  uuid: string;
+  ip: string | null;
+  user_agent: string | null;
+}
