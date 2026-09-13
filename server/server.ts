@@ -448,7 +448,7 @@ app.post('/guitar-api/ai-search', async (req: Request, res: Response) => {
 
   try {
     const response = await axios.post('https://api.deepseek.com/v1/chat/completions', {
-      model: 'deepseek-v4-flash',
+      model: 'deepseek-flash',
       thinking: { type: "disabled" },
       messages: [
         { role: 'system', content: `用户搜索了吉他谱关键词。可用的歌曲有：${songNames.join('、')}。从歌曲列表中找出最匹配的，按相关度排序，只返回 JSON 数组` },

@@ -13,17 +13,29 @@ services:
       - ./server/images:/app/images
       - ./server/backups:/app/backups
     restart: unless-stopped
+    networks:
+      default:
+      web:
+        # 供统一网关按此别名转发 /guitar-api
+        aliases:
+          - xianji-api
 
   # ---- Nginx 前端 ----
+  # 不再直接占用 80 端口，改为由统一网关（chat 项目的 gateway 服务）转发 /guitar/
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "80:80"
+    expose:
+      - "80"
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      default:
+      web:
+        aliases:
+          - xianji-web
 
   # ---- 定时备份 ----
   backup:
@@ -37,3 +49,8 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+
+networks:
+  # 与 chat 项目共享的外部网络，需先 docker network create web
+  web:
+    external: true

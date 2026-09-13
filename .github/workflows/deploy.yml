@@ -27,10 +27,11 @@ jobs:
 
       - name: Sync files via rsync
         run: |
+          # 必须排除 .env，否则 --delete 会把服务器上的密钥删掉
           rsync -avz --delete --exclude='.git' --exclude='node_modules' \
             --exclude='server/node_modules' --exclude='server/data' \
             --exclude='server/images' --exclude='server/backups' \
-            --exclude='dist' \
+            --exclude='dist' --exclude='.env' \
             -e 'ssh -o ServerAliveInterval=30' \
             ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/app/xianji/
 
