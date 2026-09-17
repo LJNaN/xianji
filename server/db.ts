@@ -20,7 +20,8 @@ db.exec(`
     img_url TEXT NOT NULL DEFAULT '[]',
     favorite INTEGER NOT NULL DEFAULT 0,
     created_at TEXT,
-    sort_order INTEGER NOT NULL DEFAULT 0
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    frequency INTEGER NOT NULL DEFAULT 0
   );
 
   CREATE TABLE IF NOT EXISTS visits (
@@ -35,6 +36,13 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_visits_date ON visits(date);
 `);
 
+// 老库补列：CREATE TABLE IF NOT EXISTS 不会给已存在的表加字段
+const songColumns = db.prepare('PRAGMA table_info(songs)').all() as { name: string }[];
+if (!songColumns.some(c => c.name === 'frequency')) {
+  db.exec('ALTER TABLE songs ADD COLUMN frequency INTEGER NOT NULL DEFAULT 0');
+  console.log('[migrate] songs 表已新增 frequency 列');
+}
+
 export default db;
 
 export interface SongRow {
@@ -44,6 +52,7 @@ export interface SongRow {
   favorite: number;
   created_at: string | null;
   sort_order: number;
+  frequency: number;
 }
 
 export interface VisitRow {

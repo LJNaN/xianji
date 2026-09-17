@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, Spin, Alert, Input, Select, Switch, Radio, Modal, App as AntApp } from 'antd';
 import { LoadingOutlined, PlusOutlined, EditOutlined, CloseOutlined, SettingOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import SongItem from './SongItem';
+import { buildSongColorMap, songPanel, DEFAULT_HUE, HUE_PRESETS } from './songColors';
 import type { Song, SongFromApi, SortMode, ThemeMode, AiSearchResponse } from './types';
 import './App.css';
 import logoBlack from './assets/xianji_black.png';
@@ -20,7 +22,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newSongName, setNewSongName] = useState('');
-  const [sortMode, setSortMode] = useState<SortMode>('latest');
+  const [sortMode, setSortMode] = useState<SortMode>('frequency');
   const [hasFetched, setHasFetched] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [favoriteSongs, setFavoriteSongs] = useState<Song[]>([]);
@@ -40,6 +42,11 @@ function App() {
     return (localStorage.getItem('guitar-theme') as ThemeMode) || 'light';
   });
 
+  const [songHue, setSongHue] = useState(() => {
+    const saved = localStorage.getItem('guitar-song-hue');
+    return saved !== null ? Number(saved) : DEFAULT_HUE;
+  });
+
   // 持久化设置
   useEffect(() => {
     localStorage.setItem('guitar-inertia', JSON.stringify(inertiaEnabled));
@@ -51,6 +58,9 @@ function App() {
     localStorage.setItem('guitar-theme', themeMode);
     window.dispatchEvent(new Event('storage'));
   }, [themeMode]);
+  useEffect(() => {
+    localStorage.setItem('guitar-song-hue', String(songHue));
+  }, [songHue]);
 
   // 访问记录（每日去重）
   useEffect(() => {
@@ -84,6 +94,7 @@ function App() {
             imgUrl: Array.isArray(item.imgUrl) ? item.imgUrl : [],
             favorite: item.favorite || false,
             createdAt: item.createdAt || null,
+            frequency: item.frequency || 0,
           }))
           : [];
         setSongs(songData);
@@ -128,7 +139,9 @@ function App() {
     };
 
     // 排序
-    if (sortMode === 'oldest') {
+    if (sortMode === 'frequency') {
+      result.sort((a, b) => b.frequency - a.frequency || a.name.localeCompare(b.name));
+    } else if (sortMode === 'oldest') {
       result.sort((a, b) => sortByDate(a, b, true));
     } else if (sortMode === 'nameAsc') {
       result.sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name));
@@ -146,6 +159,10 @@ function App() {
   useEffect(() => {
     setFavoriteSongs(songs.filter(s => s.favorite));
   }, [songs]);
+
+  // 频率配色：按全量歌曲计算，这样搜索过滤时颜色不会变
+  const songColors = useMemo(() => buildSongColorMap(songs, songHue), [songs, songHue]);
+  const favPanel = useMemo(() => songPanel(songHue), [songHue]);
 
   // AI 搜索 - 通过后端代理调用 DeepSeek
   useEffect(() => {
@@ -283,20 +300,11 @@ function App() {
 
       if (!response.ok) throw new Error('新增失败');
 
-      // 更新本地状态
-      const newSong: Song = {
-        id: `song-${Date.now()}`,
-        name,
-        imgUrl: [],
-        favorite: false,
-        createdAt: new Date().toISOString(),
-      };
-      const updatedSongs = [...songs, newSong];
-      setSongs(updatedSongs);
-      setFilteredSongs([...filteredSongs, newSong]);
+      // 直接跳进刚建的歌，省得回列表里再翻一遍
       setNewSongName('');
       setIsAddModalOpen(false);
       message.success('新增成功');
+      navigate(`/detail/${encodeURIComponent(name)}`);
     } catch (err) {
       console.error('新增失败:', err);
       message.error('新增失败，请重试');
@@ -306,6 +314,8 @@ function App() {
   const handleSongClick = (name: string) => {
     if (isEditing) return;
     const song = songs.find(s => s.name === name);
+    // 记一次播放频率，失败不影响跳转
+    fetch(`/guitar-api/songs/${encodeURIComponent(name)}/visit`, { method: 'POST' }).catch(() => {});
     navigate(`/detail/${encodeURIComponent(name)}`, { state: { song } });
   };
 
@@ -363,8 +373,21 @@ function App() {
         <>
           {/* 最爱区域 */}
           {favoriteSongs.length > 0 && (
-            <div className="favorites-section" style={{ marginBottom: 16, background: '#fff5f5', border: '1px solid #ffd7d5', borderRadius: 8, padding: '8px 8px 4px' }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#e8453c', marginBottom: 8, paddingLeft: 4 }}>
+            <div
+              className="favorites-section"
+              style={{
+                marginBottom: 16,
+                borderRadius: 8,
+                padding: '8px 8px 4px',
+                '--fav-bg-l': favPanel.lightBg,
+                '--fav-bg-d': favPanel.darkBg,
+                '--fav-border-l': favPanel.lightBorder,
+                '--fav-border-d': favPanel.darkBorder,
+                '--fav-text-l': favPanel.lightText,
+                '--fav-text-d': favPanel.darkText,
+              } as CSSProperties}
+            >
+              <div className="favorites-title" style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, paddingLeft: 4 }}>
                 ❤️ 最爱
               </div>
               <div className="song-grid" style={{ gap: 8 }}>
@@ -411,6 +434,7 @@ function App() {
               onChange={(value: SortMode) => setSortMode(value)}
               className="control-sort"
               options={[
+                { value: 'frequency', label: '播放频率' },
                 { value: 'latest', label: '最新添加' },
                 { value: 'oldest', label: '最早添加' },
                 { value: 'nameAsc', label: '字数从少到多' },
@@ -433,7 +457,7 @@ function App() {
                     type="primary"
                     icon={<PlusOutlined />}
                     onClick={() => {
-                      setSortMode('latest');
+                      setSortMode('frequency');
                       setSearchTerm('');
                     }}
                   >
@@ -459,6 +483,7 @@ function App() {
                   song={song}
                   favorite={song.favorite}
                   isEditing={isEditing}
+                  color={songColors.get(song.name)}
                   onSongClick={handleSongClick}
                   onDelete={handleDelete}
                   onToggleFavorite={handleToggleFavorite}
@@ -520,6 +545,27 @@ function App() {
             checked={inertiaEnabled}
             onChange={(checked) => setInertiaEnabled(checked)}
           />
+        </div>
+
+        <div style={{ borderTop: '1px solid #f0f0f0', padding: '12px 0' }}>
+          <div style={{ fontWeight: 500 }}>歌曲配色</div>
+          <div style={{ fontSize: 12, color: '#999', marginTop: 2, marginBottom: 10 }}>
+            列表里点得越多的歌颜色越深，一次没点过的不上色
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            {HUE_PRESETS.map(({ hue, label }) => (
+              <button
+                key={hue}
+                type="button"
+                title={label}
+                aria-label={label}
+                aria-pressed={hue === songHue}
+                onClick={() => setSongHue(hue)}
+                className={`hue-swatch${hue === songHue ? ' is-selected' : ''}`}
+                style={{ background: `hsl(${hue} 65% 55%)` }}
+              />
+            ))}
+          </div>
         </div>
 
         <div style={{ borderTop: '1px solid #f0f0f0', padding: '12px 0' }}>

@@ -29,6 +29,7 @@ interface SongFromApi {
   imgUrl: string[];
   favorite: boolean;
   createdAt: string | null;
+  frequency: number;
 }
 
 // ---- JSON → SQLite 迁移 ----
@@ -97,6 +98,9 @@ app.get('/guitar-api/proxy-image', async (req: Request, res: Response) => {
       }
     });
     res.set('Content-Type', resp.headers['content-type'] as string);
+    // 候选图在筛选时会先被加载一次做像素统计，接着渲染时还要再用一次。
+    // 不带缓存头的话每张图要下载两遍，白费一倍流量
+    res.set('Cache-Control', 'public, max-age=300');
     resp.data.pipe(res);
   } catch (e) {
     res.status(500).end();
@@ -129,6 +133,7 @@ function rowToSong(row: SongRow | undefined): SongFromApi | null {
     imgUrl: JSON.parse(row.img_url),
     favorite: !!row.favorite,
     createdAt: row.created_at,
+    frequency: row.frequency,
   };
 }
 
@@ -170,6 +175,14 @@ app.put('/guitar-api/songs/:name/favorite', (req: Request, res: Response) => {
   const newVal = row.favorite ? 0 : 1;
   db.prepare('UPDATE songs SET favorite = ? WHERE name = ?').run(newVal, name);
   res.json({ message: '更新成功', favorite: !!newVal });
+});
+
+app.post('/guitar-api/songs/:name/visit', (req: Request, res: Response) => {
+  const { name } = req.params;
+  const result = db.prepare('UPDATE songs SET frequency = frequency + 1 WHERE name = ?').run(name);
+  if (result.changes === 0) return res.status(404).json({ error: '歌曲未找到' });
+  const row = db.prepare('SELECT frequency FROM songs WHERE name = ?').get(name) as { frequency: number };
+  res.json({ message: '更新成功', frequency: row.frequency });
 });
 
 app.put('/guitar-api/songs/:old_name', (req: Request, res: Response) => {
@@ -300,22 +313,39 @@ app.post('/guitar-api/tabs/:title', async (req: Request, res: Response) => {
   }
 });
 
+// 一次搜索最多取回这么多个候选来源：够用户点几次「换一个」，
+// 又不至于每次请求都把 Bing 十页抓一遍
+const MAX_SOURCES = 10;
+// 单次请求最多实际抓几个来源。前端不满意会带着 startFrom 再点一次，
+// 所以这里只是一次点击的预算，不是能爬的总数
+const MAX_ATTEMPTS = 5;
+const ATTEMPT_TIMEOUT = 5000;
+const TOTAL_TIMEOUT = 30000;
+
 app.post('/guitar-api/tabs/:name/auto-fetch', async (req: Request, res: Response) => {
   const { name } = req.params;
-  const ATTEMPT_TIMEOUT = 5000;
-  const MAX_ATTEMPTS = 5;
-  const TOTAL_TIMEOUT = 30000;
+  // 前端「换一个来源」时带上上一次的下标 +1，从那里继续往下爬
+  const rawStart = (req.body as { startFrom?: unknown })?.startFrom;
+  const startFrom = typeof rawStart === 'number' && Number.isInteger(rawStart) && rawStart >= 0 ? rawStart : 0;
 
   try {
-    const resultUrls = await searchBingResults(`${name}吉他谱`, MAX_ATTEMPTS);
-    if (!resultUrls || resultUrls.length === 0) {
-      return res.status(404).json({ error: '未在 Bing 搜索到相关结果' });
+    const allUrls = await searchBingResults(`${name}吉他谱`, MAX_SOURCES);
+    const total = allUrls.length;
+    if (total === 0) {
+      return res.status(404).json({ error: '未在 Bing 搜索到相关结果', index: 0, total: 0 });
+    }
+    if (startFrom >= total) {
+      return res.status(404).json({ error: '已经没有更多搜索结果了', index: total, total });
     }
 
+    const resultUrls = allUrls.slice(startFrom, startFrom + MAX_ATTEMPTS);
     const startTime = Date.now();
     const attemptLogs: Array<{ url: string; error: string }> = [];
+    let lastIndex = startFrom - 1;
 
     for (let i = 0; i < resultUrls.length; i++) {
+      const index = startFrom + i;
+      lastIndex = index;
       if (Date.now() - startTime > TOTAL_TIMEOUT) {
         attemptLogs.push({ url: resultUrls[i], error: '总超时 30 秒，跳过' });
         break;
@@ -323,7 +353,7 @@ app.post('/guitar-api/tabs/:name/auto-fetch', async (req: Request, res: Response
 
       if (i > 0) await new Promise(r => setTimeout(r, 1000));
 
-      console.log(`[auto-fetch] 正在尝试 (${i + 1}/${resultUrls.length}): ${resultUrls[i]}`);
+      console.log(`[auto-fetch] 正在尝试 (${index + 1}/${total}): ${resultUrls[i]}`);
 
       try {
         const result: { type: string; data: string[] } = await Promise.race([
@@ -333,7 +363,12 @@ app.post('/guitar-api/tabs/:name/auto-fetch', async (req: Request, res: Response
 
         if (result && result.type === 'image' && result.data && result.data.length > 0) {
           console.log(`[auto-fetch] ✓ 成功: ${resultUrls[i]} (${result.data.length} 张图片)`);
-          return res.json({ source_url: resultUrls[i], candidate_images: result.data });
+          return res.json({
+            source_url: resultUrls[i],
+            candidate_images: result.data,
+            index,
+            total,
+          });
         }
         const msg = '未提取到图片';
         console.log(`[auto-fetch] ✗ ${resultUrls[i]} — ${msg}`);
@@ -345,10 +380,12 @@ app.post('/guitar-api/tabs/:name/auto-fetch', async (req: Request, res: Response
       }
     }
 
-    console.log(`[auto-fetch] 所有尝试均失败 (${attemptLogs.length} 个)`);
+    console.log(`[auto-fetch] 本轮全部失败 (${attemptLogs.length} 个)，下次从 ${lastIndex + 1}/${total} 继续`);
     res.status(404).json({
       error: `已尝试 ${attemptLogs.length} 个搜索结果，均失败`,
       details: attemptLogs,
+      index: lastIndex,
+      total,
     });
   } catch (e) {
     res.status(500).json({ error: `自动获取失败: ${(e as Error).message}` });

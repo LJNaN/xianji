@@ -7,7 +7,7 @@ import {
 import {
   LoadingOutlined, LeftOutlined,
   SearchOutlined, SettingOutlined, UploadOutlined, HolderOutlined,
-  HeartOutlined, HeartFilled
+  HeartOutlined, HeartFilled, ReloadOutlined
 } from '@ant-design/icons';
 import {
   DndContext, closestCenter, PointerSensor, KeyboardSensor,
@@ -19,6 +19,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { TransformWrapper, TransformComponent, type ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import type { SongFromApi, AutoFetchResponse } from './types';
+import { screenImages } from './imageStats';
 import './App.css';
 
 const { Title, Text } = Typography;
@@ -28,6 +29,10 @@ function proxyUrl(url: string): string {
   return `/guitar-api/proxy-image?url=${encodeURIComponent(url)}`;
 }
 
+// 一个来源整批都不像谱时最多连跳几个。跳太多会让加载转圈太久，
+// 到顶就摊牌让人自己决定，反正「换一个来源」还能接着往后爬
+const MAX_SOURCE_HOPS = 5;
+
 function TabsPage() {
   const { name } = useParams<{ name: string }>();
   const navigate = useNavigate();
@@ -36,6 +41,11 @@ function TabsPage() {
   const [error, setError] = useState<string | null>(null);
   const [customUrl, setCustomUrl] = useState('');
   const [candidateImages, setCandidateImages] = useState<string[]>([]);
+  // 被筛掉的「明显不是谱」的图：不删数据、只是默认不显示，留个「显示全部」的退路
+  const [hiddenImages, setHiddenImages] = useState<Set<string>>(new Set());
+  const [showHidden, setShowHidden] = useState(false);
+  // 这一轮已经跳过了几个「整批都是垃圾」的来源，用于加载提示
+  const [skippedSources, setSkippedSources] = useState(0);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [showSelector, setShowSelector] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -49,6 +59,12 @@ function TabsPage() {
   const [isSliderDragging, setIsSliderDragging] = useState(false);
   const [autoFetching, setAutoFetching] = useState(false);
   const [autoFetchError, setAutoFetchError] = useState<AutoFetchResponse | string | null>(null);
+  // sourceIndex 是「当前这组候选图」的来源下标（只在成功时更新，用于显示）；
+  // nextFrom 是「下一个该试的来源」下标，失败时也会往前推进。
+  // 两者分开是因为换来源失败时显示的图还是旧的，下标不能跟着跳
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const [sourceTotal, setSourceTotal] = useState(0);
+  const [nextFrom, setNextFrom] = useState(0);
   const savedImagesRef = useRef<string[]>([]);
   const [barVisible, setBarVisible] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
@@ -146,6 +162,9 @@ function TabsPage() {
       const data: AutoFetchResponse = await res.json();
       if (res.ok) {
         setCandidateImages(data.candidate_images || []);
+        // 指定 URL 提取的那条路不筛（用户是自己挑的页面），但要把上一批的筛选结果清掉，
+        // 否则碰巧同名的 URL 会被莫名其妙藏起来
+        setHiddenImages(new Set());
         setShowSelector(true);
         setSelectedImages([]);
       } else {
@@ -158,29 +177,86 @@ function TabsPage() {
     }
   };
 
-  const handleAutoFetch = async () => {
-    savedImagesRef.current = selectedImages;
+  const handleAutoFetch = async (startFrom = 0) => {
+    // 在结果页点「换一个来源」时失败，只是这一批不行，不该把页面切回空态
+    const fromSelector = showSelector;
+    // 只有第一次进来才记快照：换来源时「取消」应该退回到整个自动获取之前，
+    // 而不是退回到上一批候选图（那批已经被替换掉了）
+    if (!fromSelector) savedImagesRef.current = selectedImages;
     setAutoFetching(true);
     setAutoFetchError(null);
+    setSkippedSources(0);
     try {
-      const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name || '')}/auto-fetch`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const data: AutoFetchResponse & { error?: string } = await res.json();
-      if (res.ok && data.candidate_images && data.candidate_images.length > 0) {
-        setCandidateImages(data.candidate_images);
+      let from = startFrom;
+      let skipped = 0;
+      // 一整批都是垃圾时留着，万一后面全是垃圾，至少还有东西给人看
+      let lastJunkBatch: { images: string[]; hidden: string[]; index: number } | null = null;
+
+      // 一个来源整批都是「不像谱」就直接跳过，接着爬下一个，
+      // 别让一个全是 logo 和二维码的页面占着结果页
+      for (let hop = 0; hop < MAX_SOURCE_HOPS; hop++) {
+        const res = await fetch(`/guitar-api/tabs/${encodeURIComponent(name || '')}/auto-fetch`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ startFrom: from })
+        });
+        const data: AutoFetchResponse & { error?: string } = await res.json();
+        if (typeof data.total === 'number') setSourceTotal(data.total);
+        // 失败时也用返回的 index 推进游标：那一批已经爬过了，下次不该重爬
+        if (typeof data.index === 'number') setNextFrom(data.index + 1);
+
+        const images = data.candidate_images;
+        if (!res.ok || !images || images.length === 0) {
+          // 后面的来源已经爬完了，把手里最后那批垃圾摊开，好过丢个错误页
+          if (lastJunkBatch) break;
+          if (fromSelector) message.warning(data.error || '没找到下一批图片');
+          else setAutoFetchError(data);
+          return;
+        }
+
+        setSourceIndex(data.index ?? from);
+        // 先量完再决定显不显示，避免网格出来一堆垃圾再一张张消失
+        const hidden = await screenImages(images, proxyUrl);
+        if (hidden.length < images.length) {
+          setCandidateImages(images);
+          setHiddenImages(new Set(hidden));
+          setShowHidden(false);
+          setSelectedImages([]);
+          setShowSelector(true);
+          return;
+        }
+
+        lastJunkBatch = { images, hidden, index: data.index ?? from };
+        from = (data.index ?? from) + 1;
+        if (from >= (data.total ?? 0)) break;
+        skipped++;
+        setSkippedSources(skipped);
+      }
+
+      if (lastJunkBatch) {
+        setSourceIndex(lastJunkBatch.index);
+        setCandidateImages(lastJunkBatch.images);
+        setHiddenImages(new Set(lastJunkBatch.hidden));
+        // 爬到最后全是垃圾，那就全摊开让人自己挑，总比空网格强
+        setShowHidden(true);
         setSelectedImages([]);
         setShowSelector(true);
-      } else {
-        setAutoFetchError(data);
       }
     } catch {
-      setAutoFetchError('自动获取请求失败');
+      if (fromSelector) message.warning('自动获取请求失败');
+      else setAutoFetchError('自动获取请求失败');
     } finally {
       setAutoFetching(false);
     }
   };
+
+  const hasNextSource = sourceTotal > 0 && nextFrom < sourceTotal;
+
+  // 全被筛掉时不要摆一个空网格出来，直接把筛掉的也显示，并说明原因
+  const allHidden = candidateImages.length > 0 && hiddenImages.size === candidateImages.length;
+  const visibleCandidates = showHidden || allHidden
+    ? candidateImages
+    : candidateImages.filter(url => !hiddenImages.has(url));
 
   const toggleImageSelection = (url: string) => {
     setSelectedImages(prev =>
@@ -539,7 +615,14 @@ function TabsPage() {
             {autoFetching ? (
               <div style={{ textAlign: 'center' }}>
                 <Spin indicator={<LoadingOutlined style={{ fontSize: 28 }} spin />} />
-                <p style={{ marginTop: 16, color: '#666', fontSize: 15 }}>正在自动搜索 &ldquo;{name}吉他谱&rdquo;...</p>
+                <p style={{ marginTop: 16, color: '#666', fontSize: 15 }}>
+                  正在自动搜索 &ldquo;{name}吉他谱&rdquo;...
+                  {skippedSources > 0 && (
+                    <span style={{ display: 'block', fontSize: 13, color: '#999', marginTop: 4 }}>
+                      已跳过 {skippedSources} 个没有谱的来源，继续往后找
+                    </span>
+                  )}
+                </p>
               </div>
             ) : (
               <div style={{ textAlign: 'center', width: '100%', maxWidth: 500, padding: '0 20px', boxSizing: 'border-box' }}>
@@ -571,7 +654,13 @@ function TabsPage() {
                   />
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <Button type="primary" onClick={handleAutoFetch} icon={<SearchOutlined />} size="large" block>
+                  <Button
+                    type="primary"
+                    onClick={() => handleAutoFetch(autoFetchError ? nextFrom : 0)}
+                    icon={<SearchOutlined />}
+                    size="large"
+                    block
+                  >
                     {autoFetchError ? '重试自动获取' : '自动获取'}
                   </Button>
                   <Button
@@ -603,7 +692,7 @@ function TabsPage() {
           <div className="detail-body" style={{ padding: '0 20px 20px' }}>
             <Title level={4} style={{ margin: '10px 0' }}>请选择有效的吉他谱图片</Title>
             <Space wrap size={[8, 16]} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
-              {candidateImages.map((url, i) => (
+              {visibleCandidates.map((url, i) => (
                 <div
                   key={i}
                   style={{
@@ -630,7 +719,11 @@ function TabsPage() {
             </Space>
 
             <div style={{ marginTop: '16px', paddingBottom: '16px', textAlign: 'center' }}>
-              <div style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>结果不准时可以先取消，再重新点击自动获取</div>
+              <div style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>
+                {sourceTotal > 1
+                  ? `来源 ${sourceIndex + 1}/${sourceTotal}${hasNextSource ? '，这批不合适就换下一个来源' : '，已经是最后一个来源了'}`
+                  : '这批不合适可以重试或换一个来源'}
+              </div>
               <Space>
                 <Button
                   type="primary"
@@ -640,10 +733,32 @@ function TabsPage() {
                 >
                   保存选中的 {selectedImages.length} 张图片
                 </Button>
+                <Button
+                  icon={<ReloadOutlined />}
+                  loading={autoFetching}
+                  disabled={!hasNextSource}
+                  onClick={() => handleAutoFetch(nextFrom)}
+                >
+                  {autoFetching ? '获取中' : '换一个来源'}
+                </Button>
                 <Button onClick={() => { setShowSelector(false); setSelectedImages(savedImagesRef.current); }}>
                   取消
                 </Button>
               </Space>
+              {hiddenImages.size > 0 && !allHidden && (
+                <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
+                  已隐藏 {hiddenImages.size} 张明显不是谱的图
+                  <Button type="link" size="small" onClick={() => setShowHidden(v => !v)}>
+                    {showHidden ? '收起' : '显示全部'}
+                  </Button>
+                </div>
+              )}
+              {allHidden && (
+                <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
+                  往后找的来源里也全是这类图，已全部显示。
+                  {hasNextSource && '可以点「换一个来源」继续往后找。'}
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -2,11 +2,13 @@ import React, { memo } from 'react';
 import { Button } from 'antd';
 import { MinusCircleOutlined, HeartFilled } from '@ant-design/icons';
 import type { Song } from './types';
+import type { SongColor } from './songColors';
 
 interface SongItemProps {
   song: Song;
   favorite: boolean;
   isEditing?: boolean;
+  color?: SongColor;
   onSongClick: (name: string) => void;
   onDelete?: (name: string) => void;
   onToggleFavorite: (name: string) => void;
@@ -16,6 +18,7 @@ const SongItem = memo<SongItemProps>(({
   song,
   favorite,
   isEditing,
+  color,
   onSongClick,
   onDelete,
   onToggleFavorite,
@@ -25,11 +28,16 @@ const SongItem = memo<SongItemProps>(({
       <Button
         size="large"
         onClick={() => onSongClick(song.name)}
+        className={color ? 'song-btn' : undefined}
         style={{
           width: '100%',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
+          ...(color && {
+            '--song-bg-l': color.lightBg,
+            '--song-bg-d': color.darkBg,
+          } as React.CSSProperties),
         }}
       >
         {song.name}

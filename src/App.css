@@ -39,6 +39,59 @@ body {
   min-width: 80px;
 }
 
+/* 按频率配色的歌曲按钮，背景色变量由 SongItem 内联注入。
+   只覆盖背景：文字色、边框、hover 高亮都交给 antd 主题，
+   这样浅色模式是黑字、深色模式是白字，两套主题自动适配 */
+.song-btn {
+  background: var(--song-bg-l) !important;
+}
+html[data-theme="dark"] .song-btn {
+  background: var(--song-bg-d) !important;
+}
+
+/* 设置里的色相选择：色块本身由内联 style 上色，这里只管外形和选中态。
+   色块统一用中调 hsl(hue 65% 55%)，是给眼睛认色相用的，
+   实际按钮是同一个色相压低饱和度后的浅色，不会这么艳 */
+.hue-swatch {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.hue-swatch:hover {
+  transform: scale(1.12);
+}
+.hue-swatch.is-selected {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.25);
+}
+
+/* 首页「最爱」板块：底色、描边、标题色都由 App 内联注入 CSS 变量，
+   跟着设置里的主题色走。以前底色和描边写死粉色、深色模式再被一条
+   html[data-theme="dark"] 规则改成灰色，两套主题各说各话。
+   过渡的时长和缓动取自 antd 的 motionDurationMid / motionEaseInOut，
+   跟按钮用同一条曲线——不然换主题色时按钮在渐变、这块直接跳变 */
+.favorites-section {
+  background: var(--fav-bg-l);
+  border: 1px solid var(--fav-border-l);
+  transition: background-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1),
+    border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+.favorites-title {
+  color: var(--fav-text-l);
+  transition: color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+html[data-theme="dark"] .favorites-section {
+  background: var(--fav-bg-d);
+  border-color: var(--fav-border-d);
+}
+html[data-theme="dark"] .favorites-title {
+  color: var(--fav-text-d);
+}
+
 /* 绿点样式 */
 .green-dot {
   position: absolute;
@@ -345,13 +398,6 @@ html[data-theme="dark"] .ant-modal span[style*="color: #1a1a1a"] {
 html[data-theme="dark"] .detail-container p {
   color: var(--text-secondary) !important;
 }
-
-/* 首页「最爱」板块 inline 背景色 */
-html[data-theme="dark"] .favorites-section {
-  background: var(--bg-elevated) !important;
-  border-color: var(--border) !important;
-}
-
 
 /* 首页 Logo 图片 - 深色模式切换 */
 .xianji-logo {
