@@ -494,8 +494,9 @@ function App() {
         </>
 
         <div style={{ marginTop: '16px', padding: '16px 16px 0 16px', textAlign: 'center', fontSize: 12, color: '#999', borderTop: '1px solid #f0f0f0' }}>
-          谱子都是网上扒的，没收费也没盈利。<br />
-          歌版权归原作者，有啥问题别找我，找我也没用。
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer" style={{ color: '#999' }}>
+            渝ICP备2026023601号-2
+          </a>
         </div>
       </Card>
 
